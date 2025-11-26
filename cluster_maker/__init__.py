@@ -17,8 +17,8 @@ Allowed libraries:
 
 # --- Data generation & basic analysis ---
 from .dataframe_builder import define_dataframe_structure, simulate_data
-from .data_analyser import calculate_descriptive_statistics, calculate_correlation
-from .data_exporter import export_to_csv, export_formatted
+from .data_analyser import calculate_descriptive_statistics, calculate_correlation, calculate_extended_statistics
+from .data_exporter import export_to_csv, export_formatted, export_summary_report
 
 # --- Preprocessing ---
 from .preprocessing import select_features, standardise_features
@@ -27,6 +27,7 @@ from .preprocessing import select_features, standardise_features
 from .algorithms import (
     kmeans,
     sklearn_kmeans,
+    sklearn_agglomerative, # <--- Added this
     init_centroids,
     assign_clusters,
     update_centroids,
@@ -54,10 +55,12 @@ __all__ = [
     # Analysis
     "calculate_descriptive_statistics",
     "calculate_correlation",
+    "calculate_extended_statistics",
 
     # Export
     "export_to_csv",
     "export_formatted",
+    "export_summary_report",
 
     # Preprocessing
     "select_features",
@@ -66,6 +69,7 @@ __all__ = [
     # Algorithms
     "kmeans",
     "sklearn_kmeans",
+    "sklearn_agglomerative", # <--- Added this
     "init_centroids",
     "assign_clusters",
     "update_centroids",

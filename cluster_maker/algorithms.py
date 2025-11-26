@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Tuple, Optional
 
 import numpy as np
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, AgglomerativeClustering
 
 
 def init_centroids(
@@ -136,4 +136,49 @@ def sklearn_kmeans(
     model.fit(X)
     labels = model.labels_
     centroids = model.cluster_centers_
+    return labels, centroids
+
+
+def sklearn_agglomerative(
+    X: np.ndarray,
+    k: int,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Wrapper for Agglomerative Hierarchical Clustering using Ward linkage.
+    
+    This method builds a hierarchy of clusters from the bottom up. We use
+    Ward's linkage, which minimizes the variance of the clusters being merged.
+    
+    Since Hierarchical clustering does not inherently produce centroids,
+    we calculate them manually after clustering to maintain compatibility
+    with the rest of the package.
+
+    Parameters
+    ----------
+    X : ndarray
+    k : int
+        Number of clusters.
+
+    Returns
+    -------
+    labels : ndarray
+    centroids : ndarray
+    """
+    if not isinstance(X, np.ndarray):
+        raise TypeError("X must be a NumPy array.")
+
+    model = AgglomerativeClustering(n_clusters=k, linkage="ward")
+    labels = model.fit_predict(X)
+    
+    # Manually calculate centroids for compatibility
+    n_features = X.shape[1]
+    centroids = np.zeros((k, n_features))
+    for i in range(k):
+        cluster_points = X[labels == i]
+        if len(cluster_points) > 0:
+            centroids[i] = cluster_points.mean(axis=0)
+        else:
+            # Fallback for empty cluster (unlikely in hierarchical, but safe)
+            centroids[i] = np.zeros(n_features)
+            
     return labels, centroids

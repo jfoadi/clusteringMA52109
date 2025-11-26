@@ -103,3 +103,7 @@ if __name__ == '__main__':
 
 ### 🧪 How to Run the New Tests
 
+# Run this in your terminal from the project root:
+
+# ```bash
+# PYTHONPATH=. python3 -m unittest tests/test_interface_and_export.py
