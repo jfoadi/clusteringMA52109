@@ -1,7 +1,7 @@
 ###
-## cluster_maker: demo for cluster analysis
-## James Foadi - University of Bath
-## November 2025
+## cluster_maker: auto-demo with data generation + clustering
+## Modified for mock exam – University of Bath
+## This version generates its own CSV, then runs clustering on it.
 ###
 
 from __future__ import annotations
@@ -10,35 +10,63 @@ import os
 import sys
 import pandas as pd
 
-from cluster_maker import run_clustering, select_features
+from cluster_maker import (
+    define_dataframe_structure,
+    simulate_data,
+    run_clustering,
+    select_features,
+)
 
 OUTPUT_DIR = "demo_output"
+DATA_DIR = "data"
+GENERATED_CSV = os.path.join(DATA_DIR, "generated_demo_data.csv")
 
 
-def main(args: list[str]) -> None:
-    print("=== cluster_maker demo: clustering analysis ===\n")
+def generate_csv() -> str:
+    """
+    Generate a synthetic CSV dataset using cluster_maker's own tools.
+    Returns the path to the generated CSV file.
+    """
 
-    # Require exactly one argument: the CSV file path
-    if len(args) != 2:
-        print("ERROR: Incorrect number of arguments provided.")
-        print("Usage: python demo/demo_cluster_analysis.py [input_csv_file]")
-        sys.exit(1)
+    print("=== Generating synthetic CSV using cluster_maker ===")
 
-    # Input CSV file
-    input_path = args[0]
-    print(f"Input CSV file: {input_path}")
+    # Step 1: Define cluster centres
+    column_specs = [
+        {"name": "x", "reps": [0.0, 5.0, -5.0]},
+        {"name": "y", "reps": [0.0, 5.0, -5.0]},
+        {"name": "z", "reps": [1.0, 2.0, 3.0]},
+    ]
 
-    # Check file exists
-    if not os.path.exists(input_path):
-        print(f"\nERROR: The file '{input_path}' does not exist.")
-        sys.exit(1)
+    seed_df = define_dataframe_structure(column_specs)
+    print("Seed DataFrame:")
+    print(seed_df)
 
-    # Load data so we can inspect numeric columns
-    print("\nLoading data to inspect available features...")
+    # Step 2: Simulate synthetic data
+    data = simulate_data(seed_df, n_points=300, cluster_std=1.0, random_state=42)
+    print("\nSample of generated data:")
+    print(data.head())
+
+    # Ensure data directory exists
+    os.makedirs(DATA_DIR, exist_ok=True)
+
+    # Step 3: Save to CSV
+    data.to_csv(GENERATED_CSV, index=False)
+    print(f"\nCSV saved to {GENERATED_CSV}")
+
+    print("=== Finished generating synthetic CSV ===\n")
+    return GENERATED_CSV
+
+
+def main() -> None:
+    print("=== cluster_maker DEMO: full automatic analysis ===\n")
+
+    print("Step 1: Creating synthetic data...")
+    input_path = generate_csv()
+
+    print("Step 2: Loading generated data...")
     df = pd.read_csv(input_path)
-    print("Data loaded successfully.")
-    print(f"Number of rows: {len(df)}")
-    print(f"Columns: {list(df.columns)}")
+    print("Loaded successfully.")
+    print(f"Columns detected: {list(df.columns)}")
 
     # Identify numeric columns
     numeric_cols = [
@@ -46,28 +74,21 @@ def main(args: list[str]) -> None:
         if pd.api.types.is_numeric_dtype(df[col])
     ]
 
-    if len(numeric_cols) < 5:
-        print("\nERROR: Not enough numeric columns for 2D clustering.")
-        print(f"Numeric columns found: {numeric_cols}")
+    if len(numeric_cols) < 2:
+        print("ERROR: The generated dataset unexpectedly has fewer than 2 numeric columns.")
         sys.exit(1)
 
-    # Take the first two numeric columns
+    # Select first two numeric columns for 2D clustering
     feature_cols = numeric_cols[:2]
-    print(f"Chosen numeric feature columns for clustering: {feature_cols}")
-    print("-" * 60)
+    print(f"Using feature columns: {feature_cols}")
 
-    # Validate feature columns using the package function
-    try:
-        _ = select_features(df, feature_cols)
-    except Exception as exc:
-        print(f"\nERROR validating features with select_features:\n{exc}")
-        sys.exit(1)
+    # Validate using package function
+    select_features(df, feature_cols)
 
     # Ensure output directory exists
     os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    # Run the orchestrator
-    print("Running clustering with run_clustering(...)")
+    print("\nStep 3: Running clustering using run_clustering()")
     result = run_clustering(
         input_path=input_path,
         feature_cols=feature_cols,
@@ -81,32 +102,25 @@ def main(args: list[str]) -> None:
 
     print("\nClustering completed.")
     print("Metrics:")
-    for key, value in result["metrics"].items():
-        print(f"  {key}: {value}")
-    print("-" * 60)
+    for k, v in result["metrics"].items():
+        print(f"  {k}: {v}")
 
-    # Save plots
+    print("\nStep 4: Saving plots and output files...")
     cluster_plot_path = os.path.join(OUTPUT_DIR, "cluster_plot.png")
     elbow_plot_path = os.path.join(OUTPUT_DIR, "elbow_plot.png")
 
-    print(f"Saving 2D cluster plot to:\n  {cluster_plot_path}")
     result["fig_cluster"].savefig(cluster_plot_path, dpi=150)
-
     if result["fig_elbow"] is not None:
-        print(f"Saving elbow plot to:\n  {elbow_plot_path}")
         result["fig_elbow"].savefig(elbow_plot_path, dpi=150)
-    else:
-        print("No elbow plot was generated (fig_elbow is None).")
 
-    print("\nClustered data saved to:")
-    print(f"  - {os.path.join(OUTPUT_DIR, 'clustered_data.csv')}")
-    print("Plots saved to:")
+    print("Files saved:")
+    print(f"  - clustered_data.csv")
     print(f"  - {cluster_plot_path}")
     if result["fig_elbow"] is not None:
         print(f"  - {elbow_plot_path}")
 
-    print("\n=== End of demo ===")
+    print("\n=== End of automatic demo ===")
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
