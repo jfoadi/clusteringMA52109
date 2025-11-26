@@ -15,11 +15,15 @@ from cluster_maker import run_clustering, select_features
 OUTPUT_DIR = "demo_output"
 
 
-def main(args: list[str]) -> None:
+def main(args: list[str] | None = None) -> None:
     print("=== cluster_maker demo: clustering analysis ===\n")
 
     # Require exactly one argument: the CSV file path
-    if len(args) != 2:
+    # Accept either a passed-in args list or use command-line args
+    if args is None:
+        args = sys.argv[1:]
+    #if len(args) != 2:
+    if len(args) != 1:
         print("ERROR: Incorrect number of arguments provided.")
         print("Usage: python demo/demo_cluster_analysis.py [input_csv_file]")
         sys.exit(1)
@@ -46,7 +50,8 @@ def main(args: list[str]) -> None:
         if pd.api.types.is_numeric_dtype(df[col])
     ]
 
-    if len(numeric_cols) < 5:
+    #if len(numeric_cols) < 5:
+    if len(numeric_cols) < 2:
         print("\nERROR: Not enough numeric columns for 2D clustering.")
         print(f"Numeric columns found: {numeric_cols}")
         sys.exit(1)
@@ -109,4 +114,8 @@ def main(args: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
+
+# Line 18 & 22 - Fixed argument handling
+# Line 54 - Need minimum of two numeric columns, not 5
+# Line 117 - no argument in main automatically sets arg to argv[1:]
