@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Union, TextIO
 
 import pandas as pd
+from .data_analyser import column_statistics
 
 
 def export_to_csv(
@@ -58,3 +59,33 @@ def export_formatted(
             f.write(table_str)
     else:
         file.write(table_str)
+
+##      b) In module "data_exporter.py", add a function that:
+##         - takes the summary DataFrame created in part (a);
+##         - writes it to a CSV file;
+##         - writes, to a separate human-readable text file, a neatly
+##           formatted summary (for example, one line per column).
+
+def export_column_statistics(
+    data: pd.DataFrame,
+    csv_filename: str,
+    text_filename: str,
+) -> None:
+    """
+    Compute column statistics and export to CSV and formatted text file.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+    csv_filename : str
+        Output CSV filename.
+    text_filename : str
+        Output text filename.
+    """
+    stats_df = column_statistics(data)
+
+    # Export to CSV
+    export_to_csv(stats_df, csv_filename, delimiter=",", include_index=True)
+
+    # Export to formatted text file
+    export_formatted(stats_df, text_filename, include_index=True)
