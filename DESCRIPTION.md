@@ -12,9 +12,9 @@ The `__init__.py` file sets up the package and exposes the main public functions
 
 The `algorithms.py` module contains the actual clustering algorithms. It includes a simple custom implementation of the K-Means algorithm which assigns points to centroids and updates them iteratively, and it also contains a wrapper around scikit-learn’s KMeans implementation. These two approaches allow both educational exploration and comparison against a standard library version.
 
-The `data_analyser.py` module provides utility functions for examining data. Its purpose is to support inspection, summarisation, and optional analysis of datasets before or after clustering. This module is useful for exploring distributions or understanding properties of the data that has been clustered.
+The `data_analyser.py` module provides utility functions for examining data. Its purpose is to support inspection, summarisation, and optional analysis of datasets before or after clustering. This module is useful for exploring distributions or understanding properties of the data that has been clustered. In task 3, a function was added that calculates the column statistics for numerical columns in a df.
 
-The `data_exporter.py` module handles the exporting of results. It contains a function that writes pandas DataFrames, including cluster labels if present, to a CSV file. This allows the clustered dataset to be saved and used outside the program.
+The `data_exporter.py` module handles the exporting of results. It contains a function that writes pandas DataFrames, including cluster labels if present, to a CSV file. This allows the clustered dataset to be saved and used outside the program. In task 3, we also created a function that saves the summary table from data_analyser.py as a csv and then presents it to the user in a readable text file.
 
 The `dataframe_builder.py` module is responsible for constructing artificial clustered datasets. It includes functionality to define a table of cluster centres and then simulate noisy data around those centres. This is particularly helpful for testing algorithms or demonstrating how clustering behaves on manufactured datasets. The module returns simulated points and also provides the true cluster label for each generated point.
 
