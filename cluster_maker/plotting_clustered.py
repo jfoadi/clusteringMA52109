@@ -36,6 +36,7 @@ def plot_clusters_2d(
         raise ValueError("X must have at least 2 features for a 2D plot.")
 
     fig, ax = plt.subplots()
+    ax.grid(True, linestyle='--', alpha=0.6)
     scatter = ax.scatter(X[:, 0], X[:, 1], c=labels, cmap="tab10", alpha=0.8)
 
     if centroids is not None:

@@ -9,104 +9,117 @@ from __future__ import annotations
 import os
 import sys
 import pandas as pd
+import numpy as np
+
+# --- PATH FIX ---
+current_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(current_dir)
+if project_root not in sys.path:
+    sys.path.append(project_root)
 
 from cluster_maker import run_clustering, select_features
+from cluster_maker.dataframe_builder import define_dataframe_structure, simulate_data
 
 OUTPUT_DIR = "demo_output"
+TEMP_INPUT_PATH = os.path.join(OUTPUT_DIR, "temp_data_input.csv")
 
+def print_header(title: str):
+    print("\n" + "=" * 80)
+    print(f" {title}")
+    print("=" * 80 + "\n")
 
-def main(args: list[str]) -> None:
-    print("=== cluster_maker demo: clustering analysis ===\n")
+def main() -> None:
+    print_header("cluster_maker Demo: Algorithm Comparison")
+    print("This script simulates data and compares two clustering approaches:")
+    print(" 1. K-Means (Centroid-based)")
+    print(" 2. Agglomerative Hierarchical (Connectivity-based)")
+    print("-" * 80)
 
-    # Require exactly one argument: the CSV file path
-    if len(args) != 2:
-        print("ERROR: Incorrect number of arguments provided.")
-        print("Usage: python demo/demo_cluster_analysis.py [input_csv_file]")
-        sys.exit(1)
-
-    # Input CSV file
-    input_path = args[0]
-    print(f"Input CSV file: {input_path}")
-
-    # Check file exists
-    if not os.path.exists(input_path):
-        print(f"\nERROR: The file '{input_path}' does not exist.")
-        sys.exit(1)
-
-    # Load data so we can inspect numeric columns
-    print("\nLoading data to inspect available features...")
-    df = pd.read_csv(input_path)
-    print("Data loaded successfully.")
-    print(f"Number of rows: {len(df)}")
-    print(f"Columns: {list(df.columns)}")
-
-    # Identify numeric columns
-    numeric_cols = [
-        col for col in df.columns
-        if pd.api.types.is_numeric_dtype(df[col])
+    # --- 1. Generate Data ---
+    print("\n[Step 1] Generating Synthetic Data...")
+    n_points = 300
+    n_clusters = 3
+    seed_specs = [
+        {"name": "FeatureA", "reps": [0.0, 5.0, -5.0]},
+        {"name": "FeatureB", "reps": [0.0, 5.0, -5.0]},
     ]
-
-    if len(numeric_cols) < 5:
-        print("\nERROR: Not enough numeric columns for 2D clustering.")
-        print(f"Numeric columns found: {numeric_cols}")
-        sys.exit(1)
-
-    # Take the first two numeric columns
-    feature_cols = numeric_cols[:2]
-    print(f"Chosen numeric feature columns for clustering: {feature_cols}")
-    print("-" * 60)
-
-    # Validate feature columns using the package function
-    try:
-        _ = select_features(df, feature_cols)
-    except Exception as exc:
-        print(f"\nERROR validating features with select_features:\n{exc}")
-        sys.exit(1)
-
-    # Ensure output directory exists
+    seed_df = define_dataframe_structure(seed_specs)
+    df = simulate_data(seed_df, n_points=n_points, cluster_std=0.8, random_state=42)
+    
     os.makedirs(OUTPUT_DIR, exist_ok=True)
+    df.to_csv(TEMP_INPUT_PATH, index=False)
+    print(f" > Generated {n_points} samples with {n_clusters} true clusters.")
 
-    # Run the orchestrator
-    print("Running clustering with run_clustering(...)")
-    result = run_clustering(
-        input_path=input_path,
-        feature_cols=feature_cols,
-        algorithm="kmeans",
-        k=3,
-        standardise=True,
-        output_path=os.path.join(OUTPUT_DIR, "clustered_data.csv"),
-        random_state=42,
-        compute_elbow=True,
-    )
+    # --- 2. Run Both Algorithms ---
+    feature_cols = ["FeatureA", "FeatureB"]
+    algorithms = ["kmeans", "agglomerative"]
+    results = {}
 
-    print("\nClustering completed.")
-    print("Metrics:")
-    for key, value in result["metrics"].items():
-        print(f"  {key}: {value}")
-    print("-" * 60)
+    print("\n[Step 2] Running Comparative Analysis...")
+    
+    for algo in algorithms:
+        print(f" > Running {algo.capitalize()}...", end=" ")
+        try:
+            # We calculate Elbow only for KMeans as it relies on inertia
+            compute_elbow = (algo == "kmeans")
+            
+            res = run_clustering(
+                input_path=TEMP_INPUT_PATH,
+                feature_cols=feature_cols,
+                algorithm=algo,
+                k=n_clusters,
+                standardise=True,
+                output_path=os.path.join(OUTPUT_DIR, f"clustered_{algo}.csv"),
+                compute_elbow=compute_elbow
+            )
+            results[algo] = res
+            print("Done.")
+            
+            # Save specific plot
+            plot_path = os.path.join(OUTPUT_DIR, f"plot_{algo}.png")
+            res["fig_cluster"].savefig(plot_path, dpi=150)
+            
+        except Exception as e:
+            print(f"\nFAILED: {e}")
 
-    # Save plots
-    cluster_plot_path = os.path.join(OUTPUT_DIR, "cluster_plot.png")
-    elbow_plot_path = os.path.join(OUTPUT_DIR, "elbow_plot.png")
+    # --- 3. Comparative Results Table ---
+    print_header("Comparative Results")
+    
+    # Define table layout
+    row_fmt = "{:<15} | {:<15} | {:<15} | {:<15}"
+    print(row_fmt.format("Metric", "K-Means", "Agglomerative", "Winner"))
+    print("-" * 70)
 
-    print(f"Saving 2D cluster plot to:\n  {cluster_plot_path}")
-    result["fig_cluster"].savefig(cluster_plot_path, dpi=150)
+    # Extract metrics
+    km_metrics = results["kmeans"]["metrics"]
+    agg_metrics = results["agglomerative"]["metrics"]
 
-    if result["fig_elbow"] is not None:
-        print(f"Saving elbow plot to:\n  {elbow_plot_path}")
-        result["fig_elbow"].savefig(elbow_plot_path, dpi=150)
-    else:
-        print("No elbow plot was generated (fig_elbow is None).")
+    # Compare Inertia
+    km_in = km_metrics.get("inertia", float('inf'))
+    agg_in = agg_metrics.get("inertia", float('inf'))
+    winner_in = "K-Means" if km_in < agg_in else "Agglomerative"
+    print(row_fmt.format("Inertia", f"{km_in:.2f}", f"{agg_in:.2f}", winner_in))
 
-    print("\nClustered data saved to:")
-    print(f"  - {os.path.join(OUTPUT_DIR, 'clustered_data.csv')}")
-    print("Plots saved to:")
-    print(f"  - {cluster_plot_path}")
-    if result["fig_elbow"] is not None:
-        print(f"  - {elbow_plot_path}")
+    # Compare Silhouette
+    km_sil = km_metrics.get("silhouette", 0)
+    agg_sil = agg_metrics.get("silhouette", 0)
+    winner_sil = "K-Means" if km_sil > agg_sil else "Agglomerative"
+    print(row_fmt.format("Silhouette", f"{km_sil:.4f}", f"{agg_sil:.4f}", winner_sil))
 
-    print("\n=== End of demo ===")
+    print("-" * 70)
+    print("(Note: Lower Inertia is better; Higher Silhouette is better)")
 
+    # --- 4. File Summary ---
+    print("\n[Step 4] Saved Outputs")
+    print(f"All files saved to: {OUTPUT_DIR}")
+    print(f" - clustered_kmeans.csv / clustered_agglomerative.csv")
+    print(f" - plot_kmeans.png      / plot_agglomerative.png")
+    
+    if results["kmeans"]["fig_elbow"]:
+         results["kmeans"]["fig_elbow"].savefig(os.path.join(OUTPUT_DIR, "elbow_kmeans.png"))
+         print(" - elbow_kmeans.png")
+
+    print("\nComparison completed successfully.")
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
