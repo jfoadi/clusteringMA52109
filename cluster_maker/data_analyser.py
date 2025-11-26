@@ -7,6 +7,7 @@
 from __future__ import annotations
 
 import pandas as pd
+import numpy as np
 
 
 def calculate_descriptive_statistics(data: pd.DataFrame) -> pd.DataFrame:
@@ -43,3 +44,31 @@ def calculate_correlation(data: pd.DataFrame) -> pd.DataFrame:
     if not isinstance(data, pd.DataFrame):
         raise TypeError("data must be a pandas DataFrame.")
     return data.corr(numeric_only=True)
+
+
+def summarize_numeric(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Return summary stats for numeric columns: mean, std, min, max, missing count.
+    Non-numeric columns are ignored.
+    """
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("Input must be a pandas DataFrame.")
+
+    numeric_df = df.select_dtypes(include=[np.number])
+    if numeric_df.empty:
+        # Return empty DataFrame with expected columns
+        return pd.DataFrame(columns=["column", "mean", "std", "min", "max", "missing"])
+
+    rows = []
+    for col in numeric_df.columns:
+        s = numeric_df[col]
+        rows.append({
+            "column": col,
+            "mean": float(s.mean()),
+            "std": float(s.std(ddof=1)),
+            "min": float(s.min()),
+            "max": float(s.max()),
+            "missing": int(s.isna().sum()),
+        })
+
+    return pd.DataFrame(rows, columns=["column", "mean", "std", "min", "max", "missing"])
