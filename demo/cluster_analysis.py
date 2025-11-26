@@ -4,6 +4,33 @@
 ## November 2025
 ###
 
+"""
+Demo script for cluster_maker package: clustering analysis workflow.
+
+This script demonstrates the complete clustering workflow including:
+- Data loading and validation
+- Feature selection
+- K-means clustering
+- Metric computation (inertia, silhouette score)
+- Visualization (cluster plot, elbow curve)
+- Result export to CSV
+
+Usage:
+    python demo/cluster_analysis.py <input_csv_file>
+
+Example:
+    python demo/cluster_analysis.py demo/sample_data.csv
+
+Advanced Usage with PCA (Task 6):
+    To use PCA for dimensionality reduction before clustering, modify the
+    run_clustering call to include:
+        use_pca=True,
+        n_components=2,
+    
+    This will apply Principal Component Analysis to reduce high-dimensional
+    data to 2 components before clustering.
+"""
+
 from __future__ import annotations
 
 import os
@@ -25,7 +52,7 @@ def main(args: list[str]) -> None:
         sys.exit(1)
 
     # Input CSV file
-    input_path = args[0]
+    input_path = args[1]
     print(f"Input CSV file: {input_path}")
 
     # Check file exists
@@ -46,7 +73,7 @@ def main(args: list[str]) -> None:
         if pd.api.types.is_numeric_dtype(df[col])
     ]
 
-    if len(numeric_cols) < 5:
+    if len(numeric_cols) < 2:
         print("\nERROR: Not enough numeric columns for 2D clustering.")
         print(f"Numeric columns found: {numeric_cols}")
         sys.exit(1)
@@ -104,6 +131,43 @@ def main(args: list[str]) -> None:
     print(f"  - {cluster_plot_path}")
     if result["fig_elbow"] is not None:
         print(f"  - {elbow_plot_path}")
+
+    # ============================================================
+    # ADVANCED FEATURE DEMONSTRATION: PCA (Task 6)
+    # ============================================================
+    print("\n" + "=" * 60)
+    print("ADVANCED FEATURE: Demonstrating PCA preprocessing")
+    print("=" * 60)
+    print("\nRunning clustering WITH PCA (dimensionality reduction)...")
+    
+    result_pca = run_clustering(
+        input_path=input_path,
+        feature_cols=feature_cols,
+        algorithm="kmeans",
+        k=3,
+        standardise=True,
+        use_pca=True,           # <-- PCA ENABLED (Task 6)
+        n_components=2,         # <-- Reduce to 2 principal components
+        output_path=os.path.join(OUTPUT_DIR, "clustered_data_pca.csv"),
+        random_state=42,
+        compute_elbow=False,    # Skip elbow for brevity
+    )
+
+    print("\nPCA-based clustering completed.")
+    print("Metrics:")
+    for key, value in result_pca["metrics"].items():
+        print(f"  {key}: {value}")
+    
+    # Save PCA plot
+    pca_plot_path = os.path.join(OUTPUT_DIR, "cluster_plot_pca.png")
+    print(f"\nSaving PCA cluster plot to:\n  {pca_plot_path}")
+    result_pca["fig_cluster"].savefig(pca_plot_path, dpi=150)
+    
+    print("\nPCA demonstration complete!")
+    print(f"PCA-transformed data saved to: {os.path.join(OUTPUT_DIR, 'clustered_data_pca.csv')}")
+    print(f"PCA plot saved to: {pca_plot_path}")
+    print("\nNOTE: When PCA is used, features are transformed to Principal Components (PC1, PC2).")
+    print("This is useful for high-dimensional data or visualization purposes.")
 
     print("\n=== End of demo ===")
 

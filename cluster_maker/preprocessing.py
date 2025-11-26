@@ -11,6 +11,40 @@ from typing import List
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+
+
+def apply_pca(data: pd.DataFrame, n_components: int = 2) -> pd.DataFrame:
+    """
+    Apply PCA to the data.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Input data (numeric).
+    n_components : int, default 2
+        Number of principal components to keep.
+
+    Returns
+    -------
+    pca_df : pandas.DataFrame
+        Transformed data with columns "PC1", "PC2", etc.
+    """
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError("data must be a pandas DataFrame.")
+
+    # Ensure data is numeric
+    numeric_data = data.select_dtypes(include=[np.number])
+    if numeric_data.shape[1] < n_components:
+        raise ValueError(
+            f"n_components ({n_components}) cannot be greater than the number of numeric features ({numeric_data.shape[1]})."
+        )
+
+    pca = PCA(n_components=n_components)
+    transformed_data = pca.fit_transform(numeric_data)
+
+    columns = [f"PC{i+1}" for i in range(n_components)]
+    return pd.DataFrame(transformed_data, columns=columns, index=data.index)
 
 
 def select_features(data: pd.DataFrame, feature_cols: List[str]) -> pd.DataFrame:
@@ -30,14 +64,14 @@ def select_features(data: pd.DataFrame, feature_cols: List[str]) -> pd.DataFrame
 
     Raises
     ------
-    KeyError
+    ValueError
         If any requested column is missing.
     TypeError
         If any selected column is non-numeric.
     """
     missing = [col for col in feature_cols if col not in data.columns]
     if missing:
-        raise KeyError(f"The following feature columns are missing: {missing}")
+        raise ValueError(f"The following feature columns are missing: {missing}")
 
     X_df = data[feature_cols].copy()
 
