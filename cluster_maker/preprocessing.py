@@ -30,14 +30,17 @@ def select_features(data: pd.DataFrame, feature_cols: List[str]) -> pd.DataFrame
 
     Raises
     ------
-    KeyError
+    ValueError
         If any requested column is missing.
     TypeError
         If any selected column is non-numeric.
     """
+    
+    # Check for missing columns (The change is raising ValueError instead of KeyError)
     missing = [col for col in feature_cols if col not in data.columns]
     if missing:
-        raise KeyError(f"The following feature columns are missing: {missing}")
+        # Changed from KeyError to ValueError to meet controlled error requirements
+        raise ValueError(f"The following feature columns are missing: {missing}")
 
     X_df = data[feature_cols].copy()
 
