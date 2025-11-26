@@ -25,7 +25,7 @@ def main(args: list[str]) -> None:
         sys.exit(1)
 
     # Input CSV file
-    input_path = args[0]
+    input_path = args[1]
     print(f"Input CSV file: {input_path}")
 
     # Check file exists
