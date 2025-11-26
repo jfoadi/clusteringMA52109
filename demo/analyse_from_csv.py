@@ -74,5 +74,7 @@ def main(args: list[str]) -> None:
 
     print("\nData analysis complete.")
 
+    print("\n=== End of demo ===")
+
 if __name__ == "__main__":
     main(sys.argv)
