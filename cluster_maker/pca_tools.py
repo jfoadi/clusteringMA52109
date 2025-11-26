@@ -6,6 +6,7 @@
 
 from __future__ import annotations
 import numpy as np
+import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
 
 
@@ -33,3 +34,30 @@ def apply_pca(X: np.ndarray, n_components: int = 2) -> np.ndarray:
 
     pca = PCA(n_components=n_components)
     return pca.fit_transform(X)
+
+
+def plot_pca_2d(X_reduced, labels=None, title="PCA – 2D Projection"):
+    plt.figure(figsize=(10, 7))
+    plt.style.use("seaborn-v0_8")
+
+    if labels is None:
+        plt.scatter(X_reduced[:, 0], X_reduced[:, 1], s=60, alpha=0.7)
+    else:
+        plt.scatter(
+            X_reduced[:, 0],
+            X_reduced[:, 1],
+            c=labels,
+            cmap="viridis",
+            s=70,
+            edgecolors="black",
+            linewidth=0.5
+        )
+
+    plt.title(title, fontsize=18, fontweight="bold")
+    plt.xlabel("Principal Component 1", fontsize=14)
+    plt.ylabel("Principal Component 2", fontsize=14)
+    plt.grid(alpha=0.3)
+
+    fig = plt.gcf()
+    plt.close()
+    return fig
