@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 
 from cluster_maker.dataframe_builder import define_dataframe_structure, simulate_data
+from cluster_maker.data_analyser import calculate_descriptive_statistics # NEW IMPORT
 
 
 class TestDataFrameBuilder(unittest.TestCase):
@@ -33,6 +34,28 @@ class TestDataFrameBuilder(unittest.TestCase):
         self.assertEqual(data.shape[0], 100)
         self.assertIn("true_cluster", data.columns)
 
+    # --- NEW TEST FUNCTION FOR TASK 3(c) ---
+    def test_descriptive_statistics_mixed_dataframe(self):
+        # Small DataFrame with 3 numeric columns, 1 non-numeric, and 1 missing value
+        df = pd.DataFrame({
+            "num1": [1, 2, 3, 4, np.nan],  # numeric with missing value
+            "num2": [10, 20, 30, 40, 50],  # numeric
+            "num3": [5.5, 6.5, 7.5, 8.5, 9.5],  # numeric
+            "cat": ["a", "b", "c", "d", "e"]  # non-numeric
+        })
 
+        summary_df = calculate_descriptive_statistics(df)
+
+        # Check that the result contains only numeric columns
+        self.assertListEqual(list(summary_df.columns), ["num1", "num2", "num3"])
+
+        # Check that count is correct for column with missing value
+        self.assertEqual(summary_df.loc["count", "num1"], 4.0)
+
+        # Check that mean is calculated correctly ignoring NaN
+        self.assertAlmostEqual(summary_df.loc["mean", "num1"], 2.5)
+
+        # Check that non-numeric column is ignored
+        self.assertNotIn("cat", summary_df.columns)
 if __name__ == "__main__":
     unittest.main()

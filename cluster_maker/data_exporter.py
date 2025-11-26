@@ -58,3 +58,31 @@ def export_formatted(
             f.write(table_str)
     else:
         file.write(table_str)
+
+def export_summary(summary_df: pd.DataFrame, csv_file: str, txt_file: str) -> None:
+    """
+    Export a summary DataFrame to both CSV and a human-readable text file.
+
+    Parameters
+    ----------
+    summary_df : pandas.DataFrame
+        The summary DataFrame from calculate_descriptive_statistics.
+    csv_file : str
+        Path to CSV output file.
+    txt_file : str
+        Path to human-readable text output file.
+    """
+    if not isinstance(summary_df, pd.DataFrame):
+        raise TypeError("summary_df must be a pandas DataFrame.")
+
+    # Export to CSV
+    summary_df.to_csv(csv_file, sep=",", index=True)
+
+    # Export to human-readable text
+    lines = []
+    for col in summary_df.columns:
+        values = ", ".join(f"{v}" for v in summary_df[col])
+        lines.append(f"{col}: {values}\n")
+
+    with open(txt_file, "w", encoding="utf-8") as f:
+        f.writelines(lines)

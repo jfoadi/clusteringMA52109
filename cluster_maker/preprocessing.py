@@ -11,6 +11,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 
 def select_features(data: pd.DataFrame, feature_cols: List[str]) -> pd.DataFrame:
@@ -67,3 +68,42 @@ def standardise_features(X: np.ndarray) -> np.ndarray:
         raise TypeError("X must be a NumPy array.")
     scaler = StandardScaler()
     return scaler.fit_transform(X)
+
+# Function for Task 6 PCA preprocessing
+def pca_preprocess(
+    data: pd.DataFrame,
+    n_components: int | float = 0.95,
+    standardize: bool = True
+) -> pd.DataFrame:
+    """
+    Apply PCA to the numeric columns of a DataFrame.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+        Input data (rows = samples, columns = features)
+    n_components : int or float, default 0.95
+        Number of components to keep, or fraction of variance explained.
+    standardize : bool, default True
+        Whether to standardize features before PCA.
+
+    Returns
+    -------
+    transformed_data : pandas.DataFrame
+        Data projected onto principal components.
+    """
+    numeric_data = data.select_dtypes(include=np.number)
+    if numeric_data.empty:
+        raise ValueError("No numeric columns available for PCA.")
+
+    X = numeric_data.values.astype(float)
+
+    # Standardize if needed
+    if standardize:
+        X = (X - X.mean(axis=0)) / X.std(axis=0, ddof=0)
+
+    pca = PCA(n_components=n_components, random_state=42)
+    X_pca = pca.fit_transform(X)
+
+    col_names = [f"PC{i+1}" for i in range(X_pca.shape[1])]
+    return pd.DataFrame(X_pca, columns=col_names)

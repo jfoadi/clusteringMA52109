@@ -10,6 +10,8 @@ import os
 import sys
 import pandas as pd
 
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))) # to import from parent dir
+
 from cluster_maker import run_clustering, select_features
 
 OUTPUT_DIR = "demo_output"
