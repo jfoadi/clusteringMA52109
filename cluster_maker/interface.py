@@ -75,14 +75,18 @@ def run_clustering(
         - "elbow_inertias": dict mapping k -> inertia (if computed)
     """
     # Load data
+        # Load data
     df = pd.read_csv(input_path)
 
-    # Select and optionally standardise features
-    # Select features (this already checks types & missing columns)
-    X_df = select_features(df, feature_cols)
+    # Select features and handle missing columns cleanly
+    try:
+        X_df = select_features(df, feature_cols)
+    except KeyError as exc:
+        # Wrap low-level KeyError in a clearer ValueError for the user
+        raise ValueError(f"One or more requested feature columns are missing: {exc}") from exc
 
-    # Standardise features if requested
     X = X_df.to_numpy(dtype=float)
+
     if standardise:
         X = standardise_features(X)
 
