@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 
 from cluster_maker.dataframe_builder import define_dataframe_structure, simulate_data
-
+from cluster_maker.data_analyser import summarize_numeric
 
 class TestDataFrameBuilder(unittest.TestCase):
     def test_define_dataframe_structure_basic(self):
@@ -33,6 +33,18 @@ class TestDataFrameBuilder(unittest.TestCase):
         self.assertEqual(data.shape[0], 100)
         self.assertIn("true_cluster", data.columns)
 
+class TestSummarizeNumeric(unittest.TestCase):              ### CHANGE: new test class
+    def test_summarize_numeric_with_mixed_df(self):
+        df = pd.DataFrame({
+            "a": [1, 2, 3, None],       # numeric with missing
+            "b": [10.0, 20.0, 30.0, 40.0],  # numeric
+            "c": [5, 5, 5, 5],          # numeric constant
+            "text": ["x", "y", "z", "w"]  # non-numeric
+        })
+        summary = summarize_numeric(df)
+        self.assertEqual(set(summary["column"].tolist()), {"a", "b", "c"})
+        missing_a = summary.loc[summary["column"] == "a", "missing"].item()
+        self.assertEqual(missing_a, 1)
 
 if __name__ == "__main__":
     unittest.main()

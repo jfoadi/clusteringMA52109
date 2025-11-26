@@ -67,3 +67,14 @@ def standardise_features(X: np.ndarray) -> np.ndarray:
         raise TypeError("X must be a NumPy array.")
     scaler = StandardScaler()
     return scaler.fit_transform(X)
+
+def pca_transform(X: np.ndarray, n_components: int = 2, random_state: int | None = None) -> np.ndarray:
+    """
+    Apply PCA to reduce dimensionality of numeric features.
+    """
+    if not isinstance(X, np.ndarray):
+        raise TypeError("X must be a NumPy array.")
+    if n_components <= 0 or n_components > X.shape[1]:
+        raise ValueError("n_components must be between 1 and n_features.")
+    pca = PCA(n_components=n_components, random_state=random_state)
+    return pca.fit_transform(X)

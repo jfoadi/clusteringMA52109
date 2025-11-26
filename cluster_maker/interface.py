@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional
 import numpy as np
 import pandas as pd
 
-from .preprocessing import select_features, standardise_features
+from .preprocessing import select_features, standardise_features, pca_transform   # <-- add pca_transform
 from .algorithms import kmeans, sklearn_kmeans
 from .evaluation import compute_inertia, elbow_curve, silhouette_score_sklearn
 from .plotting_clustered import plot_clusters_2d, plot_elbow
@@ -28,6 +28,7 @@ def run_clustering(
     random_state: Optional[int] = None,
     compute_elbow: bool = False,
     elbow_k_values: Optional[List[int]] = None,
+    use_pca: bool = False,   # <-- NEW explicit parameter
 ) -> Dict[str, Any]:
     """
     High-level function to run the full clustering workflow.
@@ -36,41 +37,11 @@ def run_clustering(
     1. Load data from CSV
     2. Select feature columns
     3. Optionally standardise features
-    4. Run the chosen clustering algorithm
-    5. Compute evaluation metrics
-    6. Generate plots
-    7. Optionally write labelled data to CSV
-
-    Parameters
-    ----------
-    input_path : str
-        Path to the input CSV file.
-    feature_cols : list of str
-        Names of feature columns to use.
-    algorithm : {"kmeans", "sklearn_kmeans"}, default "kmeans"
-    k : int, default 3
-        Number of clusters.
-    standardise : bool, default True
-    output_path : str or None, default None
-        If provided, the input data with cluster labels will be saved to this CSV.
-    random_state : int or None, default None
-    compute_elbow : bool, default False
-        If True, compute inertia for multiple k values.
-    elbow_k_values : list of int or None, default None
-        k-values for elbow curve. If None and compute_elbow is True, defaults
-        to range 1..(k+5).
-
-    Returns
-    -------
-    result : dict
-        Dictionary containing:
-        - "data": DataFrame with added "cluster" column
-        - "labels": ndarray of cluster labels
-        - "centroids": ndarray of cluster centroids
-        - "metrics": dict with "inertia" and optional "silhouette"
-        - "fig_cluster": Figure for the cluster plot
-        - "fig_elbow": Figure for the elbow plot or None
-        - "elbow_inertias": dict mapping k -> inertia (if computed)
+    4. Optionally apply PCA
+    5. Run the chosen clustering algorithm
+    6. Compute evaluation metrics
+    7. Generate plots
+    8. Optionally write labelled data to CSV
     """
     # Load data
     df = pd.read_csv(input_path)
@@ -81,6 +52,10 @@ def run_clustering(
 
     if standardise:
         X = standardise_features(X)
+
+    # Optional PCA reduction
+    if use_pca:
+        X = pca_transform(X, n_components=2, random_state=random_state)
 
     # Run clustering
     if algorithm == "kmeans":
@@ -138,4 +113,5 @@ def run_clustering(
         "fig_elbow": fig_elbow,
         "elbow_inertias": elbow_inertias,
     }
+
     return result
