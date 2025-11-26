@@ -43,3 +43,29 @@ def calculate_correlation(data: pd.DataFrame) -> pd.DataFrame:
     if not isinstance(data, pd.DataFrame):
         raise TypeError("data must be a pandas DataFrame.")
     return data.corr(numeric_only=True)
+
+
+def column_summary(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute summary statistics for numeric columns in a DataFrame.
+    Returns a new DataFrame with one row per numeric column, containing:
+    mean, std, min, max, and number of missing values.
+
+    Non-numeric columns are ignored.
+    """
+
+    # Select numeric columns only
+    numeric_df = df.select_dtypes(include="number")
+
+    summary = {
+        "mean": numeric_df.mean(),
+        "std": numeric_df.std(),
+        "min": numeric_df.min(),
+        "max": numeric_df.max(),
+        "n_missing": numeric_df.isna().sum(),
+    }
+
+    # Convert dict of Series to DataFrame
+    summary_df = pd.DataFrame(summary)
+
+    return summary_df
