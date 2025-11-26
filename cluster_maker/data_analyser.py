@@ -43,3 +43,47 @@ def calculate_correlation(data: pd.DataFrame) -> pd.DataFrame:
     if not isinstance(data, pd.DataFrame):
         raise TypeError("data must be a pandas DataFrame.")
     return data.corr(numeric_only=True)
+
+def summarise_numeric(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Summarise numeric columns of a DataFrame by computing:
+      - mean
+      - standard deviation
+      - minimum
+      - maximum
+      - number of missing values
+
+    Non-numeric columns are ignored.
+
+    Parameters
+    ----------
+    df : pandas.DataFrame
+        Input DataFrame.
+
+    Returns
+    -------
+    summary : pandas.DataFrame
+        Summary statistics with one row per numeric column and
+        columns: ['mean', 'std', 'min', 'max', 'n_missing'].
+    """
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError("df must be a pandas DataFrame.")
+
+    # Extract only numeric columns
+    numeric_df = df.select_dtypes(include="number")
+
+    # Handle case where there are no numeric columns
+    if numeric_df.empty:
+        return pd.DataFrame(
+            columns=["mean", "std", "min", "max", "n_missing"]
+        )
+
+    summary = pd.DataFrame(index=numeric_df.columns)
+
+    summary["mean"] = numeric_df.mean()
+    summary["std"] = numeric_df.std()
+    summary["min"] = numeric_df.min()
+    summary["max"] = numeric_df.max()
+    summary["n_missing"] = numeric_df.isna().sum()
+
+    return summary

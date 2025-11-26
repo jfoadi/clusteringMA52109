@@ -17,11 +17,16 @@ OUTPUT_DIR = "demo_output"
 
 def main(args: list[str]) -> None:
     print("=== cluster_maker demo: clustering analysis ===\n")
+    print("This demo will:")
+    print("  - read a CSV file,")
+    print("  - automatically choose two numeric features,")
+    print("  - run a KMeans clustering model (k = 3),")
+    print("  - save clustered data and plots into the 'demo_output' folder.\n")
 
     # Require exactly one argument: the CSV file path
-    if len(args) != 2:
+    if len(args) != 1:
         print("ERROR: Incorrect number of arguments provided.")
-        print("Usage: python demo/demo_cluster_analysis.py [input_csv_file]")
+        print("Usage: python demo/cluster_analysis.py path/to/input.csv")
         sys.exit(1)
 
     # Input CSV file
@@ -40,6 +45,10 @@ def main(args: list[str]) -> None:
     print(f"Number of rows: {len(df)}")
     print(f"Columns: {list(df.columns)}")
 
+    # Show a small sample of the dataset
+    print("\nHere is a preview of the dataset (first 5 rows):")
+    print(df.head())
+
     # Identify numeric columns
     numeric_cols = [
         col for col in df.columns
@@ -53,8 +62,14 @@ def main(args: list[str]) -> None:
 
     # Take the first two numeric columns
     feature_cols = numeric_cols[:2]
-    print(f"Chosen numeric feature columns for clustering: {feature_cols}")
+    print(f"\nChosen numeric feature columns for clustering: {feature_cols}")
     print("-" * 60)
+
+    # Remind the user what model is being used
+    print("We will now run KMeans clustering with:")
+    print("  - number of clusters k = 3")
+    print("  - standardisation of features")
+    print("  - elbow method to help assess cluster quality\n")
 
     # Validate feature columns using the package function
     try:
@@ -109,4 +124,5 @@ def main(args: list[str]) -> None:
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    # Pass only the user arguments (excluding the script name)
+    main(sys.argv[1:])

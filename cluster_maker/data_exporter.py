@@ -1,60 +1,71 @@
 ###
 ## cluster_maker
+## Data export utilities
 ## James Foadi - University of Bath
 ## November 2025
 ###
 
 from __future__ import annotations
 
-from typing import Union, TextIO
-
+import os
 import pandas as pd
 
 
-def export_to_csv(
-    data: pd.DataFrame,
-    filename: str,
-    delimiter: str = ",",
-    include_index: bool = False,
-) -> None:
+def export_summary(summary_df: pd.DataFrame, csv_path: str, txt_path: str) -> None:
     """
-    Export a DataFrame to CSV.
+    Export a numeric summary DataFrame to a CSV file and to a human-readable
+    text summary file.
 
     Parameters
     ----------
-    data : pandas.DataFrame
-    filename : str
-        Output filename.
-    delimiter : str, default ","
-    include_index : bool, default False
+    summary_df : pandas.DataFrame
+        Summary DataFrame returned by `summarise_numeric`, with numeric column names
+        as the index and columns ['mean', 'std', 'min', 'max', 'n_missing'].
+    csv_path : str
+        Path where the CSV file will be written.
+    txt_path : str
+        Path where the text summary will be written.
+
+    Raises
+    ------
+    TypeError
+        If summary_df is not a pandas DataFrame.
+    ValueError
+        If summary_df is None.
+    FileNotFoundError
+        If the directory for either output path does not exist.
     """
-    if not isinstance(data, pd.DataFrame):
-        raise TypeError("data must be a pandas DataFrame.")
-    data.to_csv(filename, sep=delimiter, index=include_index)
+    # Validate summary_df
+    if summary_df is None:
+        raise ValueError("summary_df must not be None.")
+    if not isinstance(summary_df, pd.DataFrame):
+        raise TypeError("summary_df must be a pandas DataFrame.")
 
+    # Check directories exist; do NOT silently create them
+    csv_dir = os.path.dirname(csv_path) or "."
+    txt_dir = os.path.dirname(txt_path) or "."
 
-def export_formatted(
-    data: pd.DataFrame,
-    file: Union[str, TextIO],
-    include_index: bool = False,
-) -> None:
-    """
-    Export a DataFrame as a formatted text table.
+    for directory in (csv_dir, txt_dir):
+        if not os.path.isdir(directory):
+            raise FileNotFoundError(f"Output directory does not exist: {directory}")
 
-    Parameters
-    ----------
-    data : pandas.DataFrame
-    file : str or file-like
-        Filename or open file handle.
-    include_index : bool, default False
-    """
-    if not isinstance(data, pd.DataFrame):
-        raise TypeError("data must be a pandas DataFrame.")
+    # Write CSV output
+    summary_df.to_csv(csv_path, index=True)
 
-    table_str = data.to_string(index=include_index)
+    # Build human-readable summary lines
+    lines = []
+    for col, row in summary_df.iterrows():
+        line = (
+            f"Column '{col}': "
+            f"mean={row['mean']:.4g}, "
+            f"std={row['std']:.4g}, "
+            f"min={row['min']:.4g}, "
+            f"max={row['max']:.4g}, "
+            f"n_missing={int(row['n_missing'])}"
+        )
+        lines.append(line)
 
-    if isinstance(file, str):
-        with open(file, "w", encoding="utf-8") as f:
-            f.write(table_str)
-    else:
-        file.write(table_str)
+    # Write text output
+    with open(txt_path, "w", encoding="utf-8") as f:
+        for line in lines:
+            f.write(line + "\n")
