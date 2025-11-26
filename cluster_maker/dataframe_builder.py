@@ -63,7 +63,7 @@ def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFra
 def simulate_data(
     seed_df: pd.DataFrame,
     n_points: int = 100,
-    cluster_std: str = "1.0",
+    cluster_std: float = 1.0,
     random_state: int | None = None,
 ) -> pd.DataFrame:
     """
