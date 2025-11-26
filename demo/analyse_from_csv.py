@@ -10,8 +10,14 @@ import os
 import sys
 import pandas as pd
 
+# Add parent directory (clusteringMA52109) to module search path
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+PARENT_DIR = os.path.dirname(SCRIPT_DIR)
+sys.path.insert(0, PARENT_DIR)
+
 from cluster_maker.data_analyser import column_summary
 from cluster_maker.data_exporter import export_summary
+
 
 OUTPUT_DIR = "demo_output"
 
