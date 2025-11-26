@@ -49,6 +49,7 @@ No other third-party libraries are required.
   - `evaluation.py` – inertia, silhouette, elbow curve  
   - `plotting_clustered.py` – 2D cluster plots and elbow plots  
   - `interface.py` – high-level `run_clustering` function  
+  - `pca_extension.py` – PCA-based preprocessing extension
 - `demo/` – example scripts  
 - `tests/` – basic unit tests using the standard library `unittest`
 

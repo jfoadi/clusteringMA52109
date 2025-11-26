@@ -34,5 +34,35 @@ class TestDataFrameBuilder(unittest.TestCase):
         self.assertIn("true_cluster", data.columns)
 
 
+
+class TestDataAnalyser(unittest.TestCase):
+    def test_get_numeric_summary(self):
+        from cluster_maker.data_analyser import get_numeric_summary
+
+        data = pd.DataFrame({
+            "A": [1.0, 2.0, 3.0, np.nan, 5.0],
+            "B": [50, 40, 30, 20, 10],
+            "C": [2.2, 3.3, 4.4, 5.5, 6.6],
+            "label": ["a", "b", "c", "d", "e"]
+        })
+        summary = get_numeric_summary(data)
+
+        # Expected numeric columns only
+        expected_columns = ["A", "B", "C"]
+        self.assertListEqual(list(summary.index), expected_columns)
+
+        # Check presence of required summary metrics
+        for metric in ["mean", "std", "min", "max", "n_missing"]:
+            self.assertIn(metric, summary.columns)
+        
+        # Check missing count is correct
+        self.assertEqual(summary.loc["A", "n_missing"], 1)
+        self.assertEqual(summary.loc["B", "n_missing"], 0)
+        self.assertEqual(summary.loc["C", "n_missing"], 0)
+
+        # Check a known mean value
+        # Mean value of B is (50+40+30+20+10)/5 = 30
+        self.assertAlmostEqual(summary.loc["B", "mean"], 30.0)
+
 if __name__ == "__main__":
     unittest.main()
