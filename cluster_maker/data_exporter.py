@@ -9,6 +9,7 @@ from __future__ import annotations
 from typing import Union, TextIO
 
 import pandas as pd
+import io
 
 
 def export_to_csv(
@@ -58,3 +59,35 @@ def export_formatted(
             f.write(table_str)
     else:
         file.write(table_str)
+
+def export_summary_report(
+    summary_df: pd.DataFrame,
+    csv_filename: str,
+    text_filename: str,
+) -> None:
+    """
+    Exports a summary DataFrame to both a CSV file and a human-readable text file.
+
+    Parameters
+    ----------
+    summary_df : pandas.DataFrame
+        Summary statistics DataFrame created in part (a).
+    csv_filename : str
+        Output filename for the CSV report.
+    text_filename : str
+        Output filename for the formatted text report.
+    """
+    if not isinstance(summary_df, pd.DataFrame):
+        raise TypeError("summary_df must be a pandas DataFrame.")
+
+    # 1. Write to CSV file
+    export_to_csv(summary_df, csv_filename, include_index=True)
+
+    # 2. Write to formatted text file
+    # Ensure the feature index is part of the string output for the human-readable format
+    text_summary = io.StringIO()
+    summary_df.to_string(buf=text_summary, header=True, index=True)
+    
+    with open(text_filename, "w", encoding="utf-8") as f:
+        f.write("--- Summary Statistics Report ---\n\n")
+        f.write(text_summary.getvalue())

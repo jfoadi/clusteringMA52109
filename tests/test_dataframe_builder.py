@@ -8,6 +8,7 @@ import unittest
 
 import numpy as np
 import pandas as pd
+from cluster_maker.data_analyser import calculate_summary_stats
 
 from cluster_maker.dataframe_builder import define_dataframe_structure, simulate_data
 
@@ -32,6 +33,20 @@ class TestDataFrameBuilder(unittest.TestCase):
         data = simulate_data(seed_df, n_points=100, random_state=1)
         self.assertEqual(data.shape[0], 100)
         self.assertIn("true_cluster", data.columns)
+    
+    def test_calculate_summary_stats(self):
+        data = pd.DataFrame({
+            "A": [1, 2, 3, np.nan],
+            "B": [4, 5, 6, 7],
+            "C": [np.nan, np.nan, np.nan, np.nan]
+        })
+        stats_df = calculate_summary_stats(data)
+        self.assertIn("mean", stats_df.columns)
+        self.assertIn("std", stats_df.columns)
+        self.assertIn("missing_count", stats_df.columns)
+        self.assertAlmostEqual(stats_df.loc["A", "mean"], 2.0)
+        self.assertEqual(stats_df.loc["C", "missing_count"], 4)
+        
 
 
 if __name__ == "__main__":
