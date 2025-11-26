@@ -58,3 +58,65 @@ def export_formatted(
             f.write(table_str)
     else:
         file.write(table_str)
+
+
+def export_summary_csv(
+    summary_df: pd.DataFrame,
+    filename: str,
+) -> None:
+    """
+    Export a summary DataFrame to a CSV file.
+
+    Parameters
+    ----------
+    summary_df : pandas.DataFrame
+        Summary DataFrame (e.g., from numeric_summary).
+    filename : str
+        Output CSV filename.
+
+    Raises
+    ------
+    TypeError
+        If summary_df is not a pandas DataFrame.
+    """
+    if not isinstance(summary_df, pd.DataFrame):
+        raise TypeError("summary_df must be a pandas DataFrame.")
+    summary_df.to_csv(filename, index=True)
+
+
+def export_summary_text(
+    summary_df: pd.DataFrame,
+    filename: str,
+) -> None:
+    """
+    Export a summary DataFrame as a formatted human-readable text file.
+
+    Parameters
+    ----------
+    summary_df : pandas.DataFrame
+        Summary DataFrame (e.g., from numeric_summary).
+    filename : str
+        Output text filename.
+
+    Raises
+    ------
+    TypeError
+        If summary_df is not a pandas DataFrame.
+    """
+    if not isinstance(summary_df, pd.DataFrame):
+        raise TypeError("summary_df must be a pandas DataFrame.")
+
+    # Format the summary as a nicely formatted text table
+    formatted_text = "Numeric Summary Statistics\n"
+    formatted_text += "=" * 70 + "\n\n"
+
+    for col_name in summary_df.index:
+        formatted_text += f"Column: {col_name}\n"
+        formatted_text += "-" * 70 + "\n"
+        for stat_name in summary_df.columns:
+            value = summary_df.loc[col_name, stat_name]
+            formatted_text += f"  {stat_name:.<30} {value}\n"
+        formatted_text += "\n"
+
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(formatted_text)
