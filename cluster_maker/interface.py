@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional
 import numpy as np
 import pandas as pd
 
-from .preprocessing import select_features, standardise_features
+from .preprocessing import select_features, standardise_features, apply_pca
 from .algorithms import kmeans, sklearn_kmeans
 from .evaluation import compute_inertia, elbow_curve, silhouette_score_sklearn
 from .plotting_clustered import plot_clusters_2d, plot_elbow
@@ -28,6 +28,7 @@ def run_clustering(
     random_state: Optional[int] = None,
     compute_elbow: bool = False,
     elbow_k_values: Optional[List[int]] = None,
+    n_components_pca: Optional[int] = None,
 ) -> Dict[str, Any]:
     """
     High-level function to run the full clustering workflow.
@@ -84,6 +85,16 @@ def run_clustering(
 
     if standardise:
         X = standardise_features(X)
+
+    if n_components_pca is not None:
+        if n_components_pca <= 0:
+            raise ValueError("n_components_pca must be a positive integer.")
+    if n_components_pca > X.shape[1]:
+        raise ValueError("n_components_pca cannot exceed the number of features.")
+        
+        # Use the function added in preprocessing.py
+    print(f"Applying PCA: Reducing features from {X.shape[1]} to {n_components_pca} components.")
+    X = apply_pca(X, n_components=n_components_pca)
 
     # Run clustering
     if algorithm == "kmeans":

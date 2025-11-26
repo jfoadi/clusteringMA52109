@@ -4,6 +4,7 @@ import tempfile
 import pandas as pd
 import numpy as np
 import shutil
+import matplotlib.pyplot as plt
 
 # Import core package functions
 from cluster_maker.interface import run_clustering
@@ -120,6 +121,61 @@ class TestInterfaceAndExport(unittest.TestCase):
             content = f.read()
         self.assertIn("Col1", content)
         self.assertIn("30", content)
+
+    def test_run_clustering_with_pca(self):
+        """
+        Verifies that run_clustering correctly applies PCA and uses the 
+        transformed data for clustering (checking final centroid shape).
+        """
+        k_clusters = 3
+        pca_components = 2
+        
+        # When run_clustering returns, 'centroids' is based on the final
+        # shape of X, which should be (n_samples, pca_components).
+        result = run_clustering(
+            input_path=self.valid_input_path,
+            feature_cols=['x', 'y', 'z'], # 3 features
+            algorithm="sklearn_kmeans",
+            k=k_clusters,
+            standardise=True,
+            n_components_pca=pca_components # Request PCA reduction
+        )
+        
+        # The centroid array should reflect the reduced dimensionality
+        # Expected shape: (k_clusters, pca_components) -> (3, 2)
+        expected_centroid_shape = (k_clusters, pca_components)
+        
+        self.assertEqual(
+            result["centroids"].shape,
+            expected_centroid_shape,
+            f"Centroids shape must be {expected_centroid_shape} after PCA, but got {result['centroids'].shape}"
+        )
+        
+        # Also check figure axes are using the reduced dimensions (2D)
+        self.assertIsInstance(result["fig_cluster"], plt.Figure)
+        
+    def test_run_clustering_pca_error_handling(self):
+        """
+        Verifies that run_clustering raises an error if n_components_pca 
+        is invalid (e.g., too high or zero/negative).
+        """
+        # Requesting 4 components when only 3 features are available
+        with self.assertRaisesRegex(ValueError, "cannot exceed the number of features"):
+            run_clustering(
+                input_path=self.valid_input_path,
+                feature_cols=['x', 'y', 'z'], # 3 features
+                k=2,
+                n_components_pca=4 # Invalid: 4 > 3
+            )
+            
+        # Requesting zero components
+        with self.assertRaisesRegex(ValueError, "must be a positive integer"):
+             run_clustering(
+                input_path=self.valid_input_path,
+                feature_cols=['x', 'y', 'z'],
+                k=2,
+                n_components_pca=0 # Invalid: 0
+            )
 
 
     def test_export_formatted_invalid_directory(self):
