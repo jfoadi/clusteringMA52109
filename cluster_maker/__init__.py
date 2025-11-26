@@ -17,8 +17,10 @@ Allowed libraries:
 
 # --- Data generation & basic analysis ---
 from .dataframe_builder import define_dataframe_structure, simulate_data
-from .data_analyser import calculate_descriptive_statistics, calculate_correlation
-from .data_exporter import export_to_csv, export_formatted
+# Updated for Task 3
+from .data_analyser import calculate_descriptive_statistics, calculate_correlation, summarise_numeric_data
+# Updated for Task 3
+from .data_exporter import export_to_csv, export_formatted, export_summary_report
 
 # --- Preprocessing ---
 from .preprocessing import select_features, standardise_features
@@ -37,6 +39,7 @@ from .evaluation import (
     compute_inertia,
     silhouette_score_sklearn,
     elbow_curve,
+    calculate_pca_explained_variance, # Task 6
 )
 
 # --- Plotting ---
@@ -51,13 +54,15 @@ __all__ = [
     "define_dataframe_structure",
     "simulate_data",
 
-    # Analysis
+    # Analysis (Task 3)
     "calculate_descriptive_statistics",
     "calculate_correlation",
+    "summarise_numeric_data",
 
-    # Export
+    # Export (Task 3)
     "export_to_csv",
     "export_formatted",
+    "export_summary_report",
 
     # Preprocessing
     "select_features",
@@ -70,10 +75,11 @@ __all__ = [
     "assign_clusters",
     "update_centroids",
 
-    # Evaluation
+    # Evaluation (Task 6)
     "compute_inertia",
     "silhouette_score_sklearn",
     "elbow_curve",
+    "calculate_pca_explained_variance",
 
     # Plotting
     "plot_clusters_2d",

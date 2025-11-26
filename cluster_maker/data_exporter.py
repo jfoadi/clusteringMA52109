@@ -58,3 +58,37 @@ def export_formatted(
             f.write(table_str)
     else:
         file.write(table_str)
+
+# File: cluster_maker/data_exporter.py
+
+# ... (existing functions)
+
+def export_summary_report(
+    summary_df: pd.DataFrame,
+    csv_path: str,
+    text_path: str,
+) -> None:
+    """
+    Exports the numeric summary DataFrame to both a CSV file and a neatly
+    formatted human-readable text file.
+
+    Parameters
+    ----------
+    summary_df : pandas.DataFrame
+        The summary DataFrame (stats as index, columns as features).
+    csv_path : str
+        Path for the CSV output file.
+    text_path : str
+        Path for the human-readable text output file.
+    """
+    if not isinstance(summary_df, pd.DataFrame):
+        raise TypeError("summary_df must be a pandas DataFrame.")
+
+    # 1. Write to CSV file (reusing export_to_csv)
+    # The index (stat names) must be included.
+    export_to_csv(summary_df, csv_path, delimiter=",", include_index=True) 
+
+    # 2. Write to human-readable text file (reusing export_formatted)
+    # Transpose the data to get one feature per row for a neat summary (one line per column)
+    formatted_data = summary_df.transpose()
+    export_formatted(formatted_data, text_path, include_index=True) 

@@ -1,0 +1,21 @@
+# DESCRIPTION: The cluster_maker Python Package
+
+`cluster_maker` is a small, educational Python package designed for **simulating clustered datasets** and running **clustering analyses** with a simple, user-friendly interface. It is primarily intended for use in practicals and exams where students may need to debug or extend an incomplete version.
+
+The package utilizes core data science libraries including **NumPy**, **pandas**, **matplotlib**, **SciPy**, and **scikit-learn**.
+
+---
+
+### Main Functionality and Components
+
+The package implements a complete clustering workflow across several modules:
+
+* **Data Generation (`dataframe_builder.py`):** Defines cluster centres via a seed DataFrame and **simulates clustered data** around these centres.
+* **Data Analysis (`data_analyser.py`):** Computes **descriptive statistics** and **correlations**.
+* **Preprocessing (`preprocessing.py`):** Handles essential steps like **feature selection** and **standardisation**.
+* **Clustering Algorithms (`algorithms.py`):** Provides a **manual K-means implementation** and a **scikit-learn KMeans wrapper**.
+* **Evaluation (`evaluation.py`):** Assesses cluster quality using **inertia**, **silhouette score**, and the **elbow curve**.
+* **Plotting (`plotting_clustered.py`):** Creates **2D cluster scatter plots** and **elbow curve plots**.
+* **High-Level Interface (`interface.py`):** Contains the **`run_clustering`** function, which acts as an orchestrator for the entire workflow.
+
+---
