@@ -25,7 +25,7 @@ def main(args: list[str]) -> None:
         sys.exit(1)
 
     # Input CSV file
-    input_path = args[0]
+    input_path = args[1]
     print(f"Input CSV file: {input_path}")
 
     # Check file exists
@@ -46,7 +46,7 @@ def main(args: list[str]) -> None:
         if pd.api.types.is_numeric_dtype(df[col])
     ]
 
-    if len(numeric_cols) < 5:
+    if len(numeric_cols) < 2:
         print("\nERROR: Not enough numeric columns for 2D clustering.")
         print(f"Numeric columns found: {numeric_cols}")
         sys.exit(1)
