@@ -35,8 +35,36 @@ def plot_clusters_2d(
     if X.shape[1] < 2:
         raise ValueError("X must have at least 2 features for a 2D plot.")
 
+    # Determine number of clusters for discrete colormap
+    unique_labels = np.unique(labels)
+    n_clusters = len(unique_labels)
+
+    # Create a discrete colormap using the first n_clusters colors of tab10
+    # Note: tab10 has 10 colors. If n_clusters > 10, we might need a larger palette,
+    # but for this assignment k is usually small.
+    if n_clusters <= 10:
+        base_cmap = plt.get_cmap("tab10")
+        colors = [base_cmap(i) for i in range(n_clusters)]
+        cmap = plt.matplotlib.colors.ListedColormap(colors)
+    else:
+        # Fallback for many clusters
+        cmap = "viridis"
+
     fig, ax = plt.subplots()
-    scatter = ax.scatter(X[:, 0], X[:, 1], c=labels, cmap="tab10", alpha=0.8)
+    
+    # We need to ensure the scatter uses the discrete map correctly
+    # We can use a BoundaryNorm or just rely on the ListedColormap with integer labels
+    # if we normalize to [0, n_clusters-1]
+    
+    scatter = ax.scatter(
+        X[:, 0], 
+        X[:, 1], 
+        c=labels, 
+        cmap=cmap, 
+        alpha=0.8,
+        vmin=-0.5, 
+        vmax=n_clusters - 0.5
+    )
 
     if centroids is not None:
         ax.scatter(
@@ -55,7 +83,8 @@ def plot_clusters_2d(
     if title:
         ax.set_title(title)
 
-    fig.colorbar(scatter, ax=ax, label="Cluster label")
+    # Discrete ticks for the colorbar
+    cbar = fig.colorbar(scatter, ax=ax, label="Cluster label", ticks=np.arange(n_clusters))
     fig.tight_layout()
     return fig, ax
 
