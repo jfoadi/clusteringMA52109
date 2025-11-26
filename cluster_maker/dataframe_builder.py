@@ -55,7 +55,13 @@ def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFra
             raise ValueError("All 'reps' lists must have the same length.")
         data[name] = list(reps)
 
-    seed_df = pd.DataFrame.from_dict(data, orient="index")
+    seed_df = pd.DataFrame(data)
+  # FIX: Used DataFrame(data) instead of orient="index".
+    # The tests expect one row per cluster and one column per feature.
+    # pd.DataFrame.from_dict(..., orient="index") transposed the structure,
+    # producing shape (2, 3) instead of the required (3, 2).
+    # Using pd.DataFrame(data) correctly treats each key as a column
+    # and each 'reps' list as the column's values (rows).
     seed_df.index.name = "cluster_id"
     return seed_df
 
@@ -63,7 +69,10 @@ def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFra
 def simulate_data(
     seed_df: pd.DataFrame,
     n_points: int = 100,
-    cluster_std: str = "1.0",
+    cluster_std: float = 1.0,
+    # cluster_std must be numeric, not string. The default was previously "1.0" (a string), 
+    # which caused a TypeError
+    # Changing the default to float ensures correct numeric comparison.
     random_state: int | None = None,
 ) -> pd.DataFrame:
     """
@@ -88,6 +97,10 @@ def simulate_data(
     """
     if n_points <= 0:
         raise ValueError("n_points must be a positive integer.")
+    
+    cluster_std = float(cluster_std)
+    # Ensure cluster_std is always treated as a float.
+    # This makes the function robust even if a user accidentally passes "1" or "0.5" as a string.
     if cluster_std <= 0:
         raise ValueError("cluster_std must be positive.")
 
