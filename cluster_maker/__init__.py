@@ -56,8 +56,7 @@ __all__ = [
     "calculate_correlation",
 
     # Export
-    "export_to_csv",
-    "export_formatted",
+    "export_summary",
 
     # Preprocessing
     "select_features",
