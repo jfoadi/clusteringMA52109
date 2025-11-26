@@ -58,3 +58,39 @@ def export_formatted(
             f.write(table_str)
     else:
         file.write(table_str)
+
+def export_numeric_summary(summary_df: pd.DataFrame, csv_path: str, txt_path: str) -> None:
+    """
+    Export a numeric summary (created by numeric_summary) to:
+      - a CSV file
+      - a human-readable formatted text file
+
+    Parameters
+    ----------
+    summary_df : pandas.DataFrame
+        Summary table from numeric_summary().
+    csv_path : str
+        Path to save CSV file.
+    txt_path : str
+        Path to save text summary file.
+    """
+
+    if not isinstance(summary_df, pd.DataFrame):
+        raise TypeError("summary_df must be a pandas DataFrame.")
+
+    # Export CSV
+    summary_df.to_csv(csv_path, index=False)
+
+    # Export formatted text
+    lines = []
+    for _, row in summary_df.iterrows():
+        line = (
+            f"Column '{row['column']}': "
+            f"mean={row['mean']:.3f}, std={row['std']:.3f}, "
+            f"min={row['min']}, max={row['max']}, "
+            f"missing={row['missing_values']}"
+        )
+        lines.append(line)
+
+    with open(txt_path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
