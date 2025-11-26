@@ -18,15 +18,15 @@ OUTPUT_DIR = "demo_output"
 def main(args: list[str]) -> None:
     print("=== cluster_maker demo: clustering analysis ===\n")
 
-    # Require exactly one argument: the CSV file path
+# Require exactly one argument: the CSV file path
     if len(args) != 2:
         print("ERROR: Incorrect number of arguments provided.")
         print("Usage: python demo/demo_cluster_analysis.py [input_csv_file]")
         sys.exit(1)
 
     # Input CSV file
-    input_path = args[0]
-    print(f"Input CSV file: {input_path}")
+    input_path = args[1] # <--- ERROR: This incorrectly accesses the script path,made corrrections
+    # ...
 
     # Check file exists
     if not os.path.exists(input_path):

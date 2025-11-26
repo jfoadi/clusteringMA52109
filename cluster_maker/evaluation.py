@@ -10,6 +10,7 @@ from typing import List, Dict, Optional
 
 import numpy as np
 from sklearn.metrics import silhouette_score
+from sklearn.decomposition import PCA
 
 from .algorithms import kmeans, sklearn_kmeans
 
@@ -92,3 +93,30 @@ def elbow_curve(
         inertia_dict[k] = inertia
 
     return inertia_dict
+
+def calculate_pca_explained_variance(X: np.ndarray) -> np.ndarray:
+    """
+    Compute the cumulative explained variance ratio of PCA components.
+
+    This diagnostic helps determine how many components (features) are needed
+    to retain a high percentage of the data's variance.
+
+    Parameters
+    ----------
+    X : ndarray of shape (n_samples, n_features)
+        The feature matrix (should be standardized for best results).
+
+    Returns
+    -------
+    cumulative_variance : ndarray of shape (n_features,)
+        The cumulative sum of the explained variance ratio for each component.
+    """
+    if X.ndim != 2 or X.shape[1] < 2:
+        raise ValueError("X must be a 2D array with at least 2 features.")
+    
+    # PCA without specifying n_components retains all components
+    pca = PCA(n_components=None)
+    pca.fit(X)
+    
+    # Return the cumulative sum of the explained variance ratio
+    return np.cumsum(pca.explained_variance_ratio_)

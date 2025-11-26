@@ -55,17 +55,20 @@ def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFra
             raise ValueError("All 'reps' lists must have the same length.")
         data[name] = list(reps)
 
-    seed_df = pd.DataFrame.from_dict(data, orient="index")
+    seed_df = pd.DataFrame.from_dict(data)
     seed_df.index.name = "cluster_id"
     return seed_df
 
 
+# File: cluster_maker/dataframe_builder.py (Lines 60-62)
+
 def simulate_data(
     seed_df: pd.DataFrame,
     n_points: int = 100,
-    cluster_std: str = "1.0",
+    cluster_std: float = 1.0,  # <-- FIXED: Changed from 'str = "1.0"' to 'float = 1.0'
     random_state: int | None = None,
 ) -> pd.DataFrame:
+    # ...
     """
     Simulate clustered data around the given cluster centres.
 
