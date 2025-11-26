@@ -11,7 +11,7 @@ from typing import List, Dict, Optional
 import numpy as np
 from sklearn.metrics import silhouette_score
 
-from .algorithms import kmeans, sklearn_kmeans
+from algorithms import kmeans, sklearn_kmeans
 
 
 def compute_inertia(
