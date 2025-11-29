@@ -55,7 +55,7 @@ def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFra
             raise ValueError("All 'reps' lists must have the same length.")
         data[name] = list(reps)
 
-    seed_df = pd.DataFrame.from_dict(data, orient="index").T # Transpose to have clusters as rows
+    seed_df = pd.DataFrame.from_dict(data, orient="index").T # Transpose to have clusters as rows, at the moment it's columns as rows
     seed_df.index.name = "cluster_id"
     return seed_df
 
