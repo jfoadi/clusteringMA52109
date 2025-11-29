@@ -1,3 +1,12 @@
+# this is a docstring for the cluster_maker package,
+# placed in the __init__.py file
+# which is excecuted when the package is imported
+# the purpose of a docstring is to
+# - explain what the code does
+# - help users understand how to use the code
+# - enable tools like help()
+# - improve readability and maintainability
+
 """
 cluster_maker
 
@@ -32,6 +41,8 @@ from .algorithms import (
     assign_clusters,
     update_centroids,
 )
+# Parentheses are only used to spread long imports across multiple lines for readability; 
+# the behaviour is exactly the same as listing them on one line.
 
 # --- Evaluation ---
 from .evaluation import (
