@@ -55,7 +55,7 @@ def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFra
             raise ValueError("All 'reps' lists must have the same length.")
         data[name] = list(reps)
 
-    seed_df = pd.DataFrame.from_dict(data, orient="index")
+    seed_df = pd.DataFrame.from_dict(data, orient="index").T # Transpose to have clusters as rows
     seed_df.index.name = "cluster_id"
     return seed_df
 
@@ -88,6 +88,10 @@ def simulate_data(
     """
     if n_points <= 0:
         raise ValueError("n_points must be a positive integer.")
+    try:
+        cluster_std = float(cluster_std)
+    except ValueError:
+        raise ValueError("cluster_std must be a numeric value.")
     if cluster_std <= 0:
         raise ValueError("cluster_std must be positive.")
 
