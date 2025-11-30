@@ -68,8 +68,14 @@ def get_numeric_column_summary(data: pd.DataFrame) -> pd.DataFrame:
     # Optional: Rename the index for clarity
     summary_df.index.name = "statistic"
     
-    print(f"  -> Final Summary DataFrame shape: {summary_df.shape}")
+    print(f"  -> Final Summary DataFrame shape: {summary_df.shape}")        
+    print("\n--- Final Numeric Summary Results (Returned DataFrame) ---")
+    print(summary_df.to_string())
+    print("----------------------------------------------------------")
+    
     print("--- Numeric Column Summary Calculation Complete ---")
+
+    return summary_df
 
     return summary_df
 
