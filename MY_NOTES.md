@@ -46,7 +46,7 @@ Summary:
 
 ## dataframe_builder.py file
 
-This module contains two core functions:
+This module contains two functions:
 - **define_dataframe_structure():** builds the dataframe that holds cluster centres
 - **simulate_data():** uses those cluster centres to generate synthetic clustered data with Gaussian noise
 
@@ -91,7 +91,7 @@ Handles Errors:
 
 ## data_analyser.py file
 
-This module contains three core functions:
+This module contains three functions:
 - **calculate_descriptive_statistics():** returns the count, mean, std, min/max and quartiles for the data
 - **calculate_correlation():** computes the correlation matrix for numeric columns
 - **summarise_numeric_columns():** creates a custom summary table with mean, std, mix/max and number of missing values
@@ -100,7 +100,7 @@ This module contains three core functions:
 This file provides basic exploratory data analysis utilities for the cluster_maker package. Its functions help users understand the dataset before clustering, by generating descriptive statistics, correlations, and simple summaries of numeric variables.
 
 
-**calculate_descriptive_statistics():**
+**calculate_descriptive_statistics():** creates a DataFrame describing the standard descriptive statistics for each numeric column 
 - INPUT:
     - Pandas DataFrame of data
 - OUTPUT:
@@ -112,7 +112,7 @@ Handles Errors:
 - if input data is not in a Pandas DataFrame (TypeError)
 
 
-**calculate_correlation():**
+**calculate_correlation():** creates a DataFrame that returns the correlation matrix for all numeric columns
 - INPUT:
     - a Pandas DataFrame of data
 - OUTPUT:
@@ -125,9 +125,62 @@ Handles Errors:
 
 
 
-**summarise_numeric_columns():**
+**summarise_numeric_columns():** provides a clean, human-readable summary of all numeric columns within a DataFrame
 - INPUT:
-    - 
+    - DataFrame of data
+- OUTPUT:
+    - DataFrame of summary statistics of numeric columns
+- It automatically identifies numeric features
+- Non-numeric columns are safely ignored, with a gentle warning to the user
+- computes key descriptive statistics (mean, standard deviation, minimum, maximum, and the number of missing values)
+- organises these results into a dictionary then into tidy summary table (DataFrame)
+
+
+Handles Errors:
+- if the input isn't a Pandas DataFrame
+
+## data_exporter.py file
+
+This module contains 3 functions:
+- **export_to_csv():** Exports a pandas DataFrame to a CSV file with optional custom delimiter and index inclusion
+- **export_formatted():** Exports a pandas DataFrame as a neatly formatted plain-text table, either to a file or to an open file-like object
+- **export_summary():**
+
+**export_to_csv():** Exports a pandas DataFrame to a CSV file with optional custom delimiter and index inclusion
+- INPUT:
+    - data (`pandas.DataFrame`) — the table of data to be exported.  
+    - filename (`str`) — the name or path of the output CSV file.  
+    - delimiter (`str`, default `","`) — the column separator to use in the CSV.  
+    - include_index (`bool`, default `False`) — whether to write the DataFrame’s index to the file.
+
+- OUTPUT:
+    - None — the function performs a file-write action, saves a CSV to the cwd and returns nothing
+- wrapper around Pandas .to_csv() function
+
+Handles Errors:
+- if data isnt a pandas dataframe (TypeError)
+
+**export_formatted():** Exports a pandas DataFrame as a neatly formatted plain-text table, either to a file or to an open file-like object
+
+- INPUT:
+    - data (`pandas.DataFrame`) — the DataFrame to be exported.  
+    - file (`str` or file-like object) — either a filename or an already opened file handle to write to.  
+    - include_index (`bool`, default `False`) — whether the DataFrame’s index should be included in the formatted text output.
+
+- OUTPUT:
+    - None — the function writes writes a text file containing a formatted table but does not return a value.
+- Converts the DataFrame into a formatted plain-text table
+- If file is a filename (string), the function opens that file in write mode and writes the formatted table to it.
+- If file is a file-like object (e.g., an already opened file, a StringIO, or a stream), it simply writes the text to the existing handle.
+
+Handles Errors:
+- if data is not a pandas dataframe
+
+**export_summary():** Exports a numeric summary DataFrame to both a CSV file and a human-readable formatted text file
+- INPUT:
+    - summary_df (`pd.DataFrame`) Output of `summarise_numeric_columns()`, containing per-column statistics  
+    - csv_path (`str`) File path for the CSV output  
+    - txt_path (`str`) File path for the formatted text summary  
 - OUTPUT:
     - 
 - 
@@ -139,3 +192,111 @@ Handles Errors:
 - 
 - 
 - 
+
+## preprocessing.py file
+
+This module contains 2 functions:
+- **select_features():**
+- **standardise_features():**
+
+
+## algorithms.py file
+
+This module contains 5 functions:
+- **init_centroids():**
+- **assign_clusters():**
+- **update_centroids():**
+- **kmeans():**
+- **sklearn_kmeans():**
+
+
+## evaluation.py file
+
+
+## plotting_clustered.py file
+
+
+## stability.py file
+
+
+## interface.py file
+
+
+## CLUSTERING EVALUATION METHODS
+--------------------------------
+
+1. INERTIA (Within-Cluster Sum of Squares)
+------------------------------------------
+Definition:
+    Inertia measures how internally coherent clusters are.
+    It is the sum of squared distances between each data point
+    and the centroid of the cluster it belongs to.
+
+Formula:
+    Inertia = Σ (for j = 1 to k) Σ (xᵢ ∈ Cⱼ) || xᵢ - μⱼ ||²
+        where:
+            Cⱼ = set of points in cluster j
+            μⱼ = centroid of cluster j
+
+Interpretation:
+    - Lower inertia → more compact clusters
+    - Higher inertia → clusters are more spread out
+    - Inertia always decreases as k increases, so it cannot be used alone
+      to find the optimal number of clusters.
+
+--------------------------------------------------------------
+
+2. THE ELBOW METHOD
+-------------------
+Purpose:
+    Used to find an appropriate number of clusters (k) by analyzing
+    how inertia changes as k increases.
+
+Procedure:
+    1. Run K-Means for a range of k values (e.g., 1–10).
+    2. Compute inertia for each k.
+    3. Plot k (x-axis) vs. inertia (y-axis).
+    4. Identify the "elbow" — the point where inertia stops
+       decreasing rapidly. This indicates the best trade-off
+       between compactness and simplicity.
+
+Interpretation:
+    - Before the elbow: adding clusters greatly reduces inertia.
+    - After the elbow: adding clusters yields minimal improvement.
+
+--------------------------------------------------------------
+
+3. SILHOUETTE SCORE
+-------------------
+Definition:
+    The silhouette score measures how well-separated and compact
+    the clusters are. It assesses the quality of the clustering
+    structure.
+
+For each sample i:
+    a(i) = mean intra-cluster distance (to points in the same cluster)
+    b(i) = mean nearest-cluster distance (to points in the closest other cluster)
+
+    s(i) = (b(i) - a(i)) / max(a(i), b(i))
+
+Range:
+    -1 ≤ s(i) ≤ 1
+        - s(i) ≈ 1 → well-clustered point (far from other clusters)
+        - s(i) ≈ 0 → on the boundary between clusters
+        - s(i) < 0 → may be misclassified
+
+Overall silhouette score:
+    Average of all s(i) values.
+
+Usage:
+    - Compute for different k values.
+    - Choose k with the highest average silhouette score
+      (best balance of separation and cohesion).
+
+--------------------------------------------------------------
+
+Summary:
+    - Inertia: measures compactness (used in Elbow Method)
+    - Elbow Method: visual heuristic to choose k
+    - Silhouette Score: quantitative measure of cluster quality
+"""
