@@ -18,7 +18,7 @@ Allowed libraries:
 # --- Data generation & basic analysis ---
 from .dataframe_builder import define_dataframe_structure, simulate_data
 from .data_analyser import calculate_descriptive_statistics, calculate_correlation, calculate_column_statistics # Added in new function for 3a)
-from .data_exporter import export_to_csv, export_formatted
+from .data_exporter import export_to_csv, export_formatted, export_statistics_summary # Added in new function for 3b)
 
 # --- Preprocessing ---
 from .preprocessing import select_features, standardise_features
@@ -59,6 +59,7 @@ __all__ = [
     # Export
     "export_to_csv",
     "export_formatted",
+    "export_statistics_summary",  # Added in new function for 3b)
 
     # Preprocessing
     "select_features",
