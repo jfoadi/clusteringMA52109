@@ -16,67 +16,125 @@ from __future__ import annotations
 import numpy as np
 from .algorithms import kmeans
 
-
+# Measures how **stable** clustering results are by repeatedly adding small noise to the data, 
+# re-running KMeans, fixing label switching, and computing how often each pair of points 
+# ends up in the same cluster.
 def cluster_stability_score(
     X: np.ndarray,
     k: int,
     n_runs: int = 20,
     noise_scale: float = 0.05,
     random_state: int | None = None,
+    algorithm: str = "kmeans",  
 ) -> float:
     """
     Compute clustering stability while correcting for label switching.
 
-    Cluster labels are aligned across runs by sorting cluster centroids,
-    ensuring that label 0 always refers to the same cluster structure,
-    label 1 to the next cluster, etc.
+    Stability is measured by repeatedly adding small noise to the dataset,
+    reclustering it, aligning labels between runs, and computing how often 
+    pairs of points appear in the same cluster.
 
-    This produces a meaningful stability score in [0,1].
+    Produces a score in [0,1], where 1 = perfectly stable.
     """
 
-    rng = np.random.RandomState(random_state)
-    n_samples = X.shape[0]
+    # ------------------------------------------------------------
+    # ERROR HANDLING
+    # ------------------------------------------------------------
 
-    # Co-occurrence matrix
+    # X must be NumPy array
+    if not isinstance(X, np.ndarray):
+        raise TypeError("X must be a NumPy array.")
+
+    n_samples = X.shape[0]
+    if n_samples < 2:
+        raise ValueError("X must contain at least 2 samples.")
+
+    # k must be valid
+    if not isinstance(k, int) or k <= 0:
+        raise ValueError("k must be a positive integer.")
+    if k > n_samples:
+        raise ValueError("k cannot be larger than the number of samples.")
+
+    # n_runs must be >= 1
+    if n_runs < 1:
+        raise ValueError("n_runs must be at least 1.")
+
+    # noise_scale must be >= 0
+    if noise_scale < 0:
+        raise ValueError("noise_scale must be non-negative.")
+
+    # algorithm must be valid
+    if algorithm not in ("kmeans", "sklearn_kmeans"):
+        raise ValueError("algorithm must be 'kmeans' or 'sklearn_kmeans'.")
+
+    # ------------------------------------------------------------
+    # Choose clustering function
+    # ------------------------------------------------------------
+    if algorithm == "kmeans":
+        cluster_func = kmeans
+    else:
+        cluster_func = sklearn_kmeans  # imported from algorithms.py
+
+    rng = np.random.RandomState(random_state)
+
+    # ------------------------------------------------------------
+    # Initialise co-occurrence matrix
+    # ------------------------------------------------------------
     co_matrix = np.zeros((n_samples, n_samples))
 
-    # --- Base clustering to determine stable label order ---
-    base_labels, base_centroids = kmeans(X, k=k, random_state=random_state)
+    # ------------------------------------------------------------
+    # Base clustering (reference run)
+    # ------------------------------------------------------------
+    try:
+        base_labels, base_centroids = cluster_func(X, k=k, random_state=random_state)
+    except Exception as exc:
+        raise RuntimeError(f"Clustering failed in base run: {exc}")
 
-    # Sort centroids by their position (e.g. first feature)
+    # Align labels by sorting centroids
     order = np.lexsort((base_centroids[:, 1], base_centroids[:, 0]))
     label_map = {old: new for new, old in enumerate(order)}
-
-    # Align base labels
     aligned_base = np.array([label_map[l] for l in base_labels])
 
-    # Update co-occurrence for the base run
+    # Update co-occurrence matrix
     for i in range(n_samples):
         for j in range(n_samples):
             if aligned_base[i] == aligned_base[j]:
                 co_matrix[i, j] += 1
 
-    # --- Perturbation runs ---
+    # ------------------------------------------------------------
+    # Perturbation runs (n_runs - 1 times)
+    # ------------------------------------------------------------
     for _ in range(n_runs - 1):
+
+        # Add Gaussian noise
         noise = rng.normal(scale=noise_scale, size=X.shape)
         X_noisy = X + noise
 
-        labels, centroids = kmeans(X_noisy, k=k, random_state=random_state)
+        # Cluster noisy data
+        try:
+            labels, centroids = cluster_func(X_noisy, k=k, random_state=random_state)
+        except Exception as exc:
+            raise RuntimeError(f"Clustering failed during noisy run: {exc}")
 
-        # Align labels using sorted centroids
+        # Align labels again using sorted centroids
         order = np.lexsort((centroids[:, 1], centroids[:, 0]))
         label_map = {old: new for new, old in enumerate(order)}
         aligned = np.array([label_map[l] for l in labels])
 
+        # Update co-occurrence matrix
         for i in range(n_samples):
             for j in range(n_samples):
                 if aligned[i] == aligned[j]:
                     co_matrix[i, j] += 1
 
-    # Final stability matrix
+    # ------------------------------------------------------------
+    # Final Stability Score
+    # ------------------------------------------------------------
+
+    # Average co-occurrence across runs
     stability_matrix = co_matrix / n_runs
 
-    # Compute mean off-diagonal stability
+    # Compute off-diagonal mean
     stability = (
         np.sum(stability_matrix) - np.trace(stability_matrix)
     ) / (n_samples * (n_samples - 1))

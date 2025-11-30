@@ -57,6 +57,8 @@ def select_features(data: pd.DataFrame, feature_cols: List[str]) -> pd.DataFrame
     return X_df
 
 
+
+# Standardises all features to zero mean and unit variance using scikit-learn’s `StandardScaler`
 def standardise_features(X: np.ndarray) -> np.ndarray:
     """
     Standardise features to zero mean and unit variance.
@@ -71,5 +73,9 @@ def standardise_features(X: np.ndarray) -> np.ndarray:
     """
     if not isinstance(X, np.ndarray):
         raise TypeError("X must be a NumPy array.")
+    # It creates a StandardScaler object, which is a tool from scikit-learn that learns how to 
+    # scale your data properly. It figures out the mean and std for each feature
     scaler = StandardScaler()
+    # fit_transform computes the mean and std for each feature such that mean = 0, standard deviation = 1 
+    # returns the standardised NumPy array
     return scaler.fit_transform(X)
