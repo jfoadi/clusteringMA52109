@@ -77,9 +77,6 @@ def get_numeric_column_summary(data: pd.DataFrame) -> pd.DataFrame:
 
     return summary_df
 
-    return summary_df
-
-
 def calculate_descriptive_statistics(data: pd.DataFrame) -> pd.DataFrame:
     """
     Compute descriptive statistics for each numeric column in the DataFrame.
