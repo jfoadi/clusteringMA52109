@@ -10,7 +10,7 @@ from typing import Union, TextIO
 
 import pandas as pd
 
-
+# Exports a pandas DataFrame to a CSV file with optional custom delimiter and index inclusion.
 def export_to_csv(
     data: pd.DataFrame,
     filename: str,
@@ -30,9 +30,11 @@ def export_to_csv(
     """
     if not isinstance(data, pd.DataFrame):
         raise TypeError("data must be a pandas DataFrame.")
+    # ERROR-HANDLING: if the input data isnt a pandas DataFrame
     data.to_csv(filename, sep=delimiter, index=include_index)
 
-
+# Exports a pandas DataFrame as a neatly formatted plain-text table, 
+# either to a file or to an open file-like object
 def export_formatted(
     data: pd.DataFrame,
     file: Union[str, TextIO],
@@ -48,18 +50,25 @@ def export_formatted(
         Filename or open file handle.
     include_index : bool, default False
     """
+    # ERROR-HANDLING: checks data is a pandas dataframe
     if not isinstance(data, pd.DataFrame):
         raise TypeError("data must be a pandas DataFrame.")
-
+# Converts the DataFrame into a formatted plain-text table
     table_str = data.to_string(index=include_index)
-
+    
     if isinstance(file, str):
+        # If file is a filename (string), the function opens that file in write mode and 
+        # writes the formatted table to it.
         with open(file, "w", encoding="utf-8") as f:
             f.write(table_str)
+            # If file is a file-like object (e.g., an already opened file, a StringIO, or a stream), 
+            # it simply writes the text to the existing handle.
     else:
         file.write(table_str)
         
+# created for task 3b
 
+# Exports a numeric summary DataFrame to both a CSV file and a human-readable formatted text file
 
 def export_summary(summary_df: pd.DataFrame, csv_path: str, txt_path: str) -> None:
     """
@@ -84,9 +93,10 @@ def export_summary(summary_df: pd.DataFrame, csv_path: str, txt_path: str) -> No
     if not isinstance(summary_df, pd.DataFrame):
         raise TypeError("summary_df must be a pandas DataFrame.")
 
-    # Write CSV
+    # saves the DataFrame as a CSV
     try:
         summary_df.to_csv(csv_path, index=True)
+        # makes errors user friendly
     except Exception as exc:
         raise ValueError(f"Could not write CSV file to '{csv_path}': {exc}")
 
@@ -107,5 +117,6 @@ def export_summary(summary_df: pd.DataFrame, csv_path: str, txt_path: str) -> No
                 )
                 f.write(line + "\n")
 
+    # makes any error user-friendly
     except Exception as exc:
         raise ValueError(f"Could not write text summary to '{txt_path}': {exc}")

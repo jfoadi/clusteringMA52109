@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
-
+# Selects a subset of columns from a DataFrame and ensures that all chosen features are numeric
 def select_features(data: pd.DataFrame, feature_cols: List[str]) -> pd.DataFrame:
     """
     Select a subset of columns to use as features, ensuring they are numeric.
@@ -35,19 +35,25 @@ def select_features(data: pd.DataFrame, feature_cols: List[str]) -> pd.DataFrame
     TypeError
         If any selected column is non-numeric.
     """
+    
+    # checking if any of the requested columns are missing
     missing = [col for col in feature_cols if col not in data.columns]
     if missing:
         raise KeyError(f"The following feature columns are missing: {missing}")
 
     X_df = data[feature_cols].copy()
-
+    # Extracts only the columns the user specified
+    # using .copy() avoids modifying the original DataFrame
+    
     non_numeric = [
         col for col in X_df.columns
         if not pd.api.types.is_numeric_dtype(X_df[col])
     ]
+
     if non_numeric:
         raise TypeError(f"The following feature columns are not numeric: {non_numeric}")
-
+    # ERROR-HANDELING: checks if any of the columns requested are non-numeric (TypeError), 
+    # k-means clustering requires numeric input
     return X_df
 
 
