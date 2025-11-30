@@ -11,6 +11,7 @@ from typing import List
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
 
 
 def select_features(data: pd.DataFrame, feature_cols: List[str]) -> pd.DataFrame:
@@ -37,7 +38,7 @@ def select_features(data: pd.DataFrame, feature_cols: List[str]) -> pd.DataFrame
     """
     missing = [col for col in feature_cols if col not in data.columns]
     if missing:
-        raise KeyError(f"The following feature columns are missing: {missing}")
+        raise ValueError(f"Required feature column(s) not found in data: {missing}")
 
     X_df = data[feature_cols].copy()
 
@@ -67,3 +68,40 @@ def standardise_features(X: np.ndarray) -> np.ndarray:
         raise TypeError("X must be a NumPy array.")
     scaler = StandardScaler()
     return scaler.fit_transform(X)
+
+def apply_pca(X: np.ndarray, n_components: int) -> np.ndarray:
+    """
+    Applies Principal Component Analysis (PCA) to reduce the dimensionality 
+    of the feature matrix X.
+
+    Parameters
+    ----------
+    X : numpy.ndarray
+        The feature matrix (rows are samples, columns are features).
+    n_components : int
+        The number of principal components to retain (must be <= X.shape[1]).
+
+    Returns
+    -------
+    X_reduced : numpy.ndarray
+        The data transformed into the principal component subspace.
+        
+    Raises
+    ------
+    ValueError
+        If n_components is invalid (e.g., > number of features).
+    """
+    n_features = X.shape[1]
+    if n_components <= 0 or n_components > n_features:
+        raise ValueError(
+            f"n_components ({n_components}) must be > 0 and <= number of features ({n_features})."
+        )
+
+    # Initialize and fit PCA
+    pca = PCA(n_components=n_components)
+    X_reduced = pca.fit_transform(X)
+    
+    # Store explained variance ratio in the PCA object if needed for diagnostics,
+    # but the function only returns the transformed data for pipeline integration.
+    
+    return X_reduced
