@@ -11,7 +11,7 @@ from typing import Dict, Any, List, Optional
 import numpy as np
 import pandas as pd
 
-from .preprocessing import select_features, standardise_features
+from .preprocessing import select_features, standardise_features, apply_pca
 from .algorithms import kmeans, sklearn_kmeans
 from .evaluation import compute_inertia, elbow_curve, silhouette_score_sklearn
 from .plotting_clustered import plot_clusters_2d, plot_elbow
@@ -24,6 +24,7 @@ def run_clustering(
     algorithm: str = "kmeans",
     k: int = 3,
     standardise: bool = True,
+    use_pca: Optional[int] = None,
     output_path: Optional[str] = None,
     random_state: Optional[int] = None,
     compute_elbow: bool = False,
@@ -87,6 +88,13 @@ def run_clustering(
 
     if standardise:
         X = standardise_features(X)
+
+    if use_pca is not None:
+        try:
+            X = apply_pca(X, n_components=use_pca)
+            print(f"Applied PCA: reduced features from {len(feature_cols)} to {use_pca} components.")
+        except ValueError as e:
+            raise ValueError(f"PCA Error: {e}") # Re-raise controlled error
 
     # Run clustering
     if algorithm == "kmeans":
