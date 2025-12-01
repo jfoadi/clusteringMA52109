@@ -21,11 +21,16 @@ def main(args: list[str]) -> None:
     # Require exactly one argument: the CSV file path
     if len(args) != 2:
         print("ERROR: Incorrect number of arguments provided.")
-        print("Usage: python demo/demo_cluster_analysis.py [input_csv_file]")
+        print("Usage: python -m demo.cluster_analysis [input_csv_file]")
+        # Updated the usage message so it matches the correct way to run this demo:
+        #     python -m demo.cluster_analysis <input_csv_file>
+        # (The old message also referenced the wrong filename, so changed this too)
         sys.exit(1)
 
     # Input CSV file
-    input_path = args[0]
+    input_path = os.path.abspath(args[-1])
+    # args[0] was the module name; args[-1] correctly gives the CSV file.
+    # os.path.abspath ensures we use a proper absolute path.
     print(f"Input CSV file: {input_path}")
 
     # Check file exists
@@ -46,10 +51,18 @@ def main(args: list[str]) -> None:
         if pd.api.types.is_numeric_dtype(df[col])
     ]
 
-    if len(numeric_cols) < 5:
-        print("\nERROR: Not enough numeric columns for 2D clustering.")
+    if len(numeric_cols) < 2:
+        print("\nERROR: At least two numeric columns are required for 2D clustering.")
+        # Updated the numeric-column check: the demo only uses two numeric features 
+        # for 2D clustering, but the original script incorrectly required at least five. 
+        # This prevented the demo from running on valid datasets such as demo_data.csv. 
+        # The condition now correctly checks for a minimum of two numeric columns.
         print(f"Numeric columns found: {numeric_cols}")
         sys.exit(1)
+        
+    if df[numeric_cols].isnull().any().any():
+        print("WARNING: Selected numeric columns contain missing values.")
+        # Warn the user if the chosen features contain missing values.
 
     # Take the first two numeric columns
     feature_cols = numeric_cols[:2]
