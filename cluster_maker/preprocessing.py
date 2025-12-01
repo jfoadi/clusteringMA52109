@@ -12,7 +12,8 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
-
+## Takes a DataFrame and a list of its columns and returns a DataFrame
+## with only those columns, ensuring they are numeric.
 def select_features(data: pd.DataFrame, feature_cols: List[str]) -> pd.DataFrame:
     """
     Select a subset of columns to use as features, ensuring they are numeric.
@@ -50,7 +51,7 @@ def select_features(data: pd.DataFrame, feature_cols: List[str]) -> pd.DataFrame
 
     return X_df
 
-
+## Standardise features to zero mean and unit variance, of a given NumPy array.
 def standardise_features(X: np.ndarray) -> np.ndarray:
     """
     Standardise features to zero mean and unit variance.

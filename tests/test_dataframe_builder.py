@@ -10,6 +10,7 @@ import numpy as np
 import pandas as pd
 
 from cluster_maker.dataframe_builder import define_dataframe_structure, simulate_data
+from cluster_maker.data_analyser import column_statistics
 
 
 class TestDataFrameBuilder(unittest.TestCase):
@@ -33,6 +34,29 @@ class TestDataFrameBuilder(unittest.TestCase):
         self.assertEqual(data.shape[0], 100)
         self.assertIn("true_cluster", data.columns)
 
+##      c) Create at least one NEW test function in the existing test file
+##         to check that the new analysis function in (a) works correctly
+##         on a small DataFrame with:
+##          - at least 3 numeric columns,
+##          - at least 1 non-numeric column,
+##          - at least 1 missing value.
+
+    def test_column_statistics(self):
+        df = pd.DataFrame({
+            "A": [1, 2, 3, None],
+            "B": [4.0, None, 6.0, 7.0],
+            "C": [None, 6.0, None, None],
+            "D": ["x", "y", "z", "w"]
+        })
+        stats_df = column_statistics(df)
+        self.assertIn("A", stats_df.index)
+        self.assertIn("B", stats_df.index)
+        self.assertIn("C", stats_df.index) 
+        self.assertNotIn("D", stats_df.index)
+        self.assertAlmostEqual(stats_df.loc["A", "mean"], 2.0)
+        self.assertEqual(stats_df.loc["A", "missing_count"], 1)
+        self.assertEqual(stats_df.loc["B", "missing_count"], 1)
+        self.assertEqual(stats_df.loc["C", "missing_count"], 3)
 
 if __name__ == "__main__":
     unittest.main()

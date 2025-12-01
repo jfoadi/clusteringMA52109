@@ -38,9 +38,21 @@ def assign_clusters(X: np.ndarray, centroids: np.ndarray) -> np.ndarray:
     # X: (n_samples, n_features)
     # centroids: (k, n_features)
     # Broadcast to compute distances
+    # Changes shape to (n_samples, k, n_features) and (1, k, n_features)
+    # diff will have shape (n_samples, k, n_features), meaning
+    # it will have in the columns the difference between each sample and each centroid
+    # in the rows the different samples, and in the depth the different features 
+    # (in 2D it would be x and y).
     diff = X[:, np.newaxis, :] - centroids[np.newaxis, :, :]
+    # Will compute the Euclidean distance along the features axis.
+    # It will create a 2D array (n_samples, k) where each entry is the distance
+    # between that sample and that centroid, using the components in all features
+    # (all depths).
     distances = np.linalg.norm(diff, axis=2)  # (n_samples, k)
+    # Assign each sample to the nearest centroid, the minimum value in each row.
     labels = np.argmin(distances, axis=1)
+    # Return the array of cluster assignments, a list of numbers from 0 to k-1
+    # of length n_samples, indicating the assigned cluster for each sample.
     return labels
 
 

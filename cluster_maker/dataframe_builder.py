@@ -12,6 +12,8 @@ import numpy as np
 import pandas as pd
 
 
+## Given a list of dictionaries specifying each one a column name and its cluster centre reps,
+## it returns a seed DataFrame describing cluster centres. It just transposes the input structure.
 def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFrame:
     """
     Define a seed DataFrame describing cluster centres.
@@ -55,15 +57,17 @@ def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFra
             raise ValueError("All 'reps' lists must have the same length.")
         data[name] = list(reps)
 
-    seed_df = pd.DataFrame.from_dict(data, orient="index")
+    seed_df = pd.DataFrame.from_dict(data, orient="columns")
     seed_df.index.name = "cluster_id"
     return seed_df
 
 
+## Given a DataFrame of cluster centres, a number of points, and a standard deviation,
+## and a random seed, it simulates clustered data around those centres, and returns a DataFrame.
 def simulate_data(
     seed_df: pd.DataFrame,
     n_points: int = 100,
-    cluster_std: str = "1.0",
+    cluster_std: float = 1.0,
     random_state: int | None = None,
 ) -> pd.DataFrame:
     """

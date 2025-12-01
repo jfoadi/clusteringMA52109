@@ -17,6 +17,8 @@ def plot_clusters_2d(
     labels: np.ndarray,
     centroids: Optional[np.ndarray] = None,
     title: Optional[str] = None,
+    x_label: str = "Feature 1",
+    y_label: str = "Feature 2"
 ) -> Tuple[plt.Figure, plt.Axes]:
     """
     Plot clustered data in 2D using the first two features.
@@ -50,8 +52,8 @@ def plot_clusters_2d(
         )
         ax.legend()
 
-    ax.set_xlabel("Feature 1")
-    ax.set_ylabel("Feature 2")
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(y_label)
     if title:
         ax.set_title(title)
 

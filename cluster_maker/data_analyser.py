@@ -43,3 +43,37 @@ def calculate_correlation(data: pd.DataFrame) -> pd.DataFrame:
     if not isinstance(data, pd.DataFrame):
         raise TypeError("data must be a pandas DataFrame.")
     return data.corr(numeric_only=True)
+
+
+# This function takes a pandas DataFrame and computes specified statistics
+# for each numeric column, while ignoring non-numeric columns.
+
+def column_statistics(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    Compute statistics for each numeric column in the DataFrame.
+
+    Parameters
+    ----------
+    data : pandas.DataFrame
+
+    Returns
+    -------
+    stats_df : pandas.DataFrame
+        DataFrame with statistics: mean, std, min, max, missing_count.
+    """
+    if not isinstance(data, pd.DataFrame):
+        raise TypeError("data must be a pandas DataFrame.")
+
+    stats = {}
+    for col in data.select_dtypes(include='number').columns:
+        col_data = data[col]
+        stats[col] = {
+            'mean': col_data.mean(),
+            'std': col_data.std(),
+            'min': col_data.min(),
+            'max': col_data.max(),
+            'missing_count': col_data.isna().sum()
+        }
+
+    stats_df = pd.DataFrame.from_dict(stats, orient='index')
+    return stats_df
