@@ -45,6 +45,14 @@ from .plotting_clustered import plot_clusters_2d, plot_elbow
 # --- High-level interface ---
 from .interface import run_clustering
 
+# --- PCA Analysis (Task 6 Extension) ---
+from .pca_analysis import (
+    compute_pca,
+    explained_variance_analysis,
+    plot_pca_variance,
+    pca_clustering_workflow,
+)
+
 
 __all__ = [
     # Data generation
@@ -83,4 +91,10 @@ __all__ = [
 
     # High-level orchestration
     "run_clustering",
+
+    # PCA Analysis (Task 6 Extension)
+    "compute_pca",
+    "explained_variance_analysis", 
+    "plot_pca_variance",
+    "pca_clustering_workflow",
 ]
