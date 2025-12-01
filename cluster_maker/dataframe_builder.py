@@ -55,7 +55,7 @@ def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFra
             raise ValueError("All 'reps' lists must have the same length.")
         data[name] = list(reps)
 
-    seed_df = pd.DataFrame.from_dict(data, orient="index")
+    seed_df = pd.DataFrame.from_dict(data) # Modification: removed orient="index" to get the correct shape
     seed_df.index.name = "cluster_id"
     return seed_df
 
@@ -63,7 +63,7 @@ def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFra
 def simulate_data(
     seed_df: pd.DataFrame,
     n_points: int = 100,
-    cluster_std: str = "1.0",
+    cluster_std: float | str = 1.0, # Modification: change from str = "1.0" to float | str = 1.0
     random_state: int | None = None,
 ) -> pd.DataFrame:
     """
@@ -88,6 +88,14 @@ def simulate_data(
     """
     if n_points <= 0:
         raise ValueError("n_points must be a positive integer.")
+    
+    # Modification: Convert cluster_std to float if it's a string
+    try:
+        cluster_std_float = float(cluster_std)
+    except (ValueError, TypeError):
+        raise ValueError("cluster_std must be a number or string representing a number.")
+    
+
     if cluster_std <= 0:
         raise ValueError("cluster_std must be positive.")
 
@@ -103,7 +111,8 @@ def simulate_data(
 
     records = []
     for cluster_id, (centre, count) in enumerate(zip(centres, counts)):
-        noise = rng.normal(loc=0.0, scale=cluster_std, size=(count, n_features))
+        # Modification: Use the converted float value
+        noise = rng.normal(loc=0.0, scale=cluster_std_float, size=(count, n_features))
         points = centre + noise
         for point in points:
             record = {col: val for col, val in zip(seed_df.columns, point)}

@@ -17,8 +17,8 @@ Allowed libraries:
 
 # --- Data generation & basic analysis ---
 from .dataframe_builder import define_dataframe_structure, simulate_data
-from .data_analyser import calculate_descriptive_statistics, calculate_correlation
-from .data_exporter import export_to_csv, export_formatted
+from .data_analyser import calculate_descriptive_statistics, calculate_correlation, calculate_column_statistics # Added in new function for 3a)
+from .data_exporter import export_to_csv, export_formatted, export_statistics_summary # Added in new function for 3b)
 
 # --- Preprocessing ---
 from .preprocessing import select_features, standardise_features
@@ -45,6 +45,14 @@ from .plotting_clustered import plot_clusters_2d, plot_elbow
 # --- High-level interface ---
 from .interface import run_clustering
 
+# --- PCA Analysis (Task 6 Extension) ---
+from .pca_analysis import (
+    compute_pca,
+    explained_variance_analysis,
+    plot_pca_variance,
+    pca_clustering_workflow,
+)
+
 
 __all__ = [
     # Data generation
@@ -54,10 +62,12 @@ __all__ = [
     # Analysis
     "calculate_descriptive_statistics",
     "calculate_correlation",
+    "calculate_column_statistics", # Added in new function for 3a)
 
     # Export
     "export_to_csv",
     "export_formatted",
+    "export_statistics_summary",  # Added in new function for 3b)
 
     # Preprocessing
     "select_features",
@@ -81,4 +91,10 @@ __all__ = [
 
     # High-level orchestration
     "run_clustering",
+
+    # PCA Analysis (Task 6 Extension)
+    "compute_pca",
+    "explained_variance_analysis", 
+    "plot_pca_variance",
+    "pca_clustering_workflow",
 ]
