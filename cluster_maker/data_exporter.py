@@ -128,7 +128,7 @@ def export_statistics_summary(
                 f.write(f"  Std Dev:       {stats['std']:>12.6f}\n")
                 f.write(f"  Minimum:       {stats['min']:>12.6f}\n")
                 f.write(f"  Maximum:       {stats['max']:>12.6f}\n")
-                f.write(f"  Missing Values: {stats['missing']:>12d}\n")
+                f.write(f"  Missing Values: {int(stats['missing']):>12d}\n") # Fixed line so now demo file in task 4) should run correctly
                 
                 # Add some derived statistics for better insights
                 f.write(f"  Range:         {(stats['max'] - stats['min']):>12.6f}\n")
