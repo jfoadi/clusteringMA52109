@@ -32,6 +32,40 @@ class TestDataFrameBuilder(unittest.TestCase):
         data = simulate_data(seed_df, n_points=100, random_state=1)
         self.assertEqual(data.shape[0], 100)
         self.assertIn("true_cluster", data.columns)
+        
+        
+# ------------------------------------------------------------
+# Task 3(c): Tests for summarise_numeric_columns (data_analyser.py)
+# ------------------------------------------------------------
+
+class TestDataAnalyser(unittest.TestCase):
+    def test_summarise_numeric_columns(self):
+
+        # Prepare a mixed DataFrame
+        df = pd.DataFrame({
+            "a": [1, 2, None, 4],          # numeric with missing
+            "b": [10, 20, 30, 40],         # numeric
+            "c": [5.5, None, 6.5, 7.0],    # numeric with missing
+            "label": ["x", "y", "z", "w"]  # non-numeric column
+        })
+
+        # Import the function under test
+        from cluster_maker.data_analyser import summarise_numeric_columns
+
+        summary = summarise_numeric_columns(df)
+
+        # Only numeric columns should appear
+        self.assertListEqual(list(summary.index), ["a", "b", "c"])
+
+        # Missing value counts correct
+        self.assertEqual(summary.loc["a", "missing_values"], 1)
+        self.assertEqual(summary.loc["c", "missing_values"], 1)
+
+        # Check one statistic for accuracy (mean of column b)
+        self.assertAlmostEqual(summary.loc["b", "mean"], 25.0)
+
+        # Non-numeric column must NOT appear
+        self.assertNotIn("label", summary.index)
 
 
 if __name__ == "__main__":

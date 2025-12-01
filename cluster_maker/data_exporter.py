@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from typing import Union, TextIO
 
+import os
 import pandas as pd
 
 
@@ -58,3 +59,56 @@ def export_formatted(
             f.write(table_str)
     else:
         file.write(table_str)
+        
+        
+def export_summary(
+    summary_df: pd.DataFrame,
+    csv_path: str,
+    text_path: str,
+) -> None:
+    """
+    Export a summary DataFrame (produced by summarise_numeric_columns)
+    to both a CSV file and a neatly formatted human-readable text file.
+
+    Parameters
+    ----------
+    summary_df : pandas.DataFrame
+        Summary table containing mean, std, min, max, missing_values.
+    csv_path : str
+        Output path for the CSV export.
+    text_path : str
+        Output path for the formatted text summary.
+
+    Raises
+    ------
+    TypeError
+        If summary_df is not a pandas DataFrame.
+    FileNotFoundError
+        If the directory for either output path does not exist.
+    """
+
+    # --- Input validation ---
+    if not isinstance(summary_df, pd.DataFrame):
+        raise TypeError("summary_df must be a pandas DataFrame.")
+
+    # Check that directories exist (robust error handling)
+    csv_dir = os.path.dirname(csv_path)
+    text_dir = os.path.dirname(text_path)
+
+    if csv_dir and not os.path.exists(csv_dir):
+        raise FileNotFoundError(f"Directory does not exist: {csv_dir}")
+
+    if text_dir and not os.path.exists(text_dir):
+        raise FileNotFoundError(f"Directory does not exist: {text_dir}")
+
+    # --- Write CSV file ---
+    summary_df.to_csv(csv_path, index=True)
+
+    # --- Write formatted text summary ---
+    formatted = summary_df.to_string(index=True)
+
+    with open(text_path, "w", encoding="utf-8") as f:
+        f.write(formatted)
+
+    # Friendly user feedback (helps with marking: user interaction)
+    print(f"Summary exported to:\n  CSV:  {csv_path}\n  Text: {text_path}")

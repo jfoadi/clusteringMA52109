@@ -55,7 +55,11 @@ def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFra
             raise ValueError("All 'reps' lists must have the same length.")
         data[name] = list(reps)
 
-    seed_df = pd.DataFrame.from_dict(data, orient="index")
+    seed_df = pd.DataFrame(data) 
+        # Replaced DataFrame.from_dict(..., orient="index") with pd.DataFrame(data)
+        # because orient="index" produced the wrong shape (2, 3). Using pd.DataFrame(data)
+        # correctly creates one row per cluster and one column per feature (shape (n_clusters, n_features)),
+        # which matches the test expectations.
     seed_df.index.name = "cluster_id"
     return seed_df
 
@@ -63,7 +67,7 @@ def define_dataframe_structure(column_specs: List[Dict[str, Any]]) -> pd.DataFra
 def simulate_data(
     seed_df: pd.DataFrame,
     n_points: int = 100,
-    cluster_std: str = "1.0",
+    cluster_std: float = 1.0, # changed so cluster_std value is treated as a float, rather than a string
     random_state: int | None = None,
 ) -> pd.DataFrame:
     """
@@ -86,8 +90,18 @@ def simulate_data(
         Simulated data with all original feature columns plus a 'true_cluster'
         column indicating the generating cluster.
     """
+    
+    if not isinstance(seed_df, pd.DataFrame):
+        raise TypeError("seed_df must be a pandas DataFrame.") 
+    # an extra safeguard added in case the user doesn't use this function after 
+    # define_dataframe_structure, in case they use this fucntion independently with another 
+    # data source with their cluster centres
+
     if n_points <= 0:
         raise ValueError("n_points must be a positive integer.")
+    
+    cluster_std = float(cluster_std) # added to ensure that cluster_std is treated as a float
+     
     if cluster_std <= 0:
         raise ValueError("cluster_std must be positive.")
 

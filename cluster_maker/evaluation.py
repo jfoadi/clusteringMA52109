@@ -10,6 +10,7 @@ from typing import List, Dict, Optional
 
 import numpy as np
 from sklearn.metrics import silhouette_score
+from sklearn.metrics import davies_bouldin_score
 
 from .algorithms import kmeans, sklearn_kmeans
 
@@ -92,3 +93,71 @@ def elbow_curve(
         inertia_dict[k] = inertia
 
     return inertia_dict
+
+
+def compute_davies_bouldin(
+    X: np.ndarray,
+    labels: np.ndarray,
+    return_details: bool = False,
+) -> dict | float:
+    """
+    Compute the Davies–Bouldin Index (DBI) with validation and optional detail.
+
+    Parameters
+    ----------
+    X : ndarray of shape (n_samples, n_features)
+    labels : ndarray of shape (n_samples,)
+        Cluster labels.
+    return_details : bool, default False
+        If True, return a dictionary with additional diagnostic information.
+
+    Returns
+    -------
+    float or dict
+        If return_details=False:
+            dbi : float
+        If return_details=True:
+            {
+                "dbi": float,
+                "clusters": int,
+                "valid": bool
+            }
+
+    Notes
+    -----
+    DBI is undefined for a single cluster. In that case, the function
+    returns np.nan and marks valid=False in details mode.
+    """
+
+    # --------- Validate inputs ----------
+    if not isinstance(X, np.ndarray):
+        raise TypeError("X must be a NumPy array.")
+
+    if not isinstance(labels, np.ndarray):
+        raise TypeError("labels must be a NumPy array.")
+
+    if X.ndim != 2:
+        raise ValueError("X must be a 2D array of shape (n_samples, n_features).")
+
+    if labels.ndim != 1:
+        raise ValueError("labels must be a 1D array of shape (n_samples,).")
+
+    if X.shape[0] != labels.shape[0]:
+        raise ValueError("X and labels must contain the same number of samples.")
+
+    unique_labels = np.unique(labels)
+    n_clusters = len(unique_labels)
+
+    # Need at least two clusters
+    if n_clusters < 2:
+        if return_details:
+            return {"dbi": np.nan, "clusters": n_clusters, "valid": False}
+        return np.nan
+
+    # --------- Compute DBI ----------
+    dbi = davies_bouldin_score(X, labels)
+
+    if return_details:
+        return {"dbi": float(dbi), "clusters": n_clusters, "valid": True}
+
+    return float(dbi)
