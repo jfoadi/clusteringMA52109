@@ -4,14 +4,27 @@
 ## November 2025
 ###
 
+
+
 from __future__ import annotations
 
 import os
 import sys
 import pandas as pd
+
+# Path of this script: demo/analyse_from_csv.py
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Path of parent directory: clusteringMA52109/
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
+# Add PROJECT_ROOT to Python path
+sys.path.insert(0, PROJECT_ROOT)
+
 from cluster_maker import summarise_numeric_columns, export_summary
 
 OUTPUT_DIR = "demo_output"
+
 
 
 def main(args: list[str]) -> None:

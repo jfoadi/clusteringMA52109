@@ -10,6 +10,15 @@ import os
 import sys
 import pandas as pd
 
+# Path of this script: demo/cluster_analysis.py
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Path of parent directory: clusteringMA52109/
+PROJECT_ROOT = os.path.dirname(SCRIPT_DIR)
+
+# Add PROJECT_ROOT to Python path
+sys.path.insert(0, PROJECT_ROOT)
+
 from cluster_maker import run_clustering, select_features
 
 OUTPUT_DIR = "demo_output"
@@ -21,10 +30,8 @@ def main(args: list[str]) -> None:
     # Require exactly one argument: the CSV file path
     if len(args) != 2:
         print("ERROR: Incorrect number of arguments provided.")
-        print("Usage: python -m demo.cluster_analysis [input_csv_file]")
-        # Updated the usage message so it matches the correct way to run this demo:
-        #     python -m demo.cluster_analysis <input_csv_file>
-        # (The old message also referenced the wrong filename, so changed this too)
+        print("Usage: python demo/cluster_analysis.py [input_csv_file]")
+        # corrected the filename in the print message
         sys.exit(1)
 
     # Input CSV file

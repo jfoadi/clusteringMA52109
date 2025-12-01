@@ -37,6 +37,7 @@ from .evaluation import (
     compute_inertia,
     silhouette_score_sklearn,
     elbow_curve,
+    compute_davies_bouldin,
 )
 
 # --- Plotting ---
@@ -77,6 +78,7 @@ __all__ = [
     "compute_inertia",
     "silhouette_score_sklearn",
     "elbow_curve",
+    "compute_davies_bouldin",
 
     # Plotting
     "plot_clusters_2d",

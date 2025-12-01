@@ -13,7 +13,7 @@ import pandas as pd
 
 from .preprocessing import select_features, standardise_features
 from .algorithms import kmeans, sklearn_kmeans
-from .evaluation import compute_inertia, elbow_curve, silhouette_score_sklearn
+from .evaluation import compute_inertia, elbow_curve, silhouette_score_sklearn, compute_davies_bouldin
 from .plotting_clustered import plot_clusters_2d, plot_elbow
 from .data_exporter import export_to_csv
 
@@ -26,6 +26,7 @@ def run_clustering(
     standardise: bool = True,
     use_pca: bool = False,
     pca_components: int = 2,
+    compute_quality: bool = False,
     output_path: Optional[str] = None,
     random_state: Optional[int] = None,
     compute_elbow: bool = False,
@@ -108,6 +109,10 @@ def run_clustering(
     except ValueError:
         sil = None
     metrics["silhouette"] = sil
+    
+    # Optional: compute quality diagnostics
+    if compute_quality:
+        metrics["davies_bouldin"] = compute_davies_bouldin(X, labels)
 
     # Add labels to DataFrame
     df = df.copy()
@@ -118,7 +123,7 @@ def run_clustering(
         export_to_csv(df, output_path, delimiter=",", include_index=False)
 
     # Plot clusters (2D)
-    fig_cluster, _ = plot_clusters_2d(X, labels, centroids=centroids, title="Cluster plot")
+    fig_cluster, _ = plot_clusters_2d(X, labels, centroids=centroids, title="Cluster plot", metrics=metrics,)
 
     # Optional elbow curve
     fig_elbow = None

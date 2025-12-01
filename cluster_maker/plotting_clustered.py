@@ -17,6 +17,7 @@ def plot_clusters_2d(
     labels: np.ndarray,
     centroids: Optional[np.ndarray] = None,
     title: Optional[str] = None,
+    metrics: Optional[dict] = None,
 ) -> Tuple[plt.Figure, plt.Axes]:
     """
     Plot clustered data in 2D using the first two features.
@@ -49,6 +50,11 @@ def plot_clusters_2d(
             label="Centroids",
         )
         ax.legend()
+        
+    if metrics is not None and "davies_bouldin" in metrics:
+        dbi = metrics["davies_bouldin"]
+        ax.text(0.02, 0.98, f"DBI = {dbi:.3f}", transform=ax.transAxes,
+                va="top", fontsize=10, bbox=dict(boxstyle="round", fc="white"))
 
     ax.set_xlabel("Feature 1")
     ax.set_ylabel("Feature 2")
