@@ -24,6 +24,8 @@ def run_clustering(
     algorithm: str = "kmeans",
     k: int = 3,
     standardise: bool = True,
+    use_pca: bool = False,
+    pca_components: int = 2,
     output_path: Optional[str] = None,
     random_state: Optional[int] = None,
     compute_elbow: bool = False,
@@ -67,7 +69,7 @@ def run_clustering(
         - "data": DataFrame with added "cluster" column
         - "labels": ndarray of cluster labels
         - "centroids": ndarray of cluster centroids
-        - "metrics": dict with "inertia" and optional "silhouette"
+        - "metrics": dict with "inertia" and optional "silhouette" and optional "pca_variance"
         - "fig_cluster": Figure for the cluster plot
         - "fig_elbow": Figure for the elbow plot or None
         - "elbow_inertias": dict mapping k -> inertia (if computed)
@@ -81,6 +83,10 @@ def run_clustering(
 
     if standardise:
         X = standardise_features(X)
+        
+    if use_pca:
+        from .preprocessing import apply_pca
+        X, explained_var = apply_pca(X, n_components=pca_components)
 
     # Run clustering
     if algorithm == "kmeans":
@@ -93,6 +99,9 @@ def run_clustering(
     # Compute metrics
     inertia = compute_inertia(X, labels, centroids)
     metrics: Dict[str, Any] = {"inertia": inertia}
+    
+    if use_pca:
+        metrics["pca_variance"] = explained_var
 
     try:
         sil = silhouette_score_sklearn(X, labels)
@@ -136,6 +145,6 @@ def run_clustering(
         "metrics": metrics,
         "fig_cluster": fig_cluster,
         "fig_elbow": fig_elbow,
-        "elbow_inertias": elbow_inertias,
+        "elbow_inertias": elbow_inertias
     }
     return result

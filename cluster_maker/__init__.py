@@ -21,7 +21,7 @@ from .data_analyser import calculate_descriptive_statistics, calculate_correlati
 from .data_exporter import export_to_csv, export_formatted, export_summary
 
 # --- Preprocessing ---
-from .preprocessing import select_features, standardise_features
+from .preprocessing import select_features, standardise_features, apply_pca
 
 # --- Clustering algorithms ---
 from .algorithms import (
@@ -64,6 +64,7 @@ __all__ = [
     # Preprocessing
     "select_features",
     "standardise_features",
+    "apply_pca",
 
     # Algorithms
     "kmeans",
